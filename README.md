@@ -1,18 +1,25 @@
-# 🎵 DJ CLI - Create Music Using Your Terminal
+# 🎵 DJ CLI - Advanced Music Generator
 
 [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-A powerful command-line tool for generating, mixing, and manipulating audio. Create beats, apply effects, and produce music directly from your terminal!
+An **advanced command-line music generator** that automatically composes complete tracks with drums, bass, chords, and melodies. Generate continuous, evolving music in multiple genres directly from your terminal!
 
 ## ✨ Features
 
-- 🎹 **Sound Generation**: Create synthesized sounds (kick, snare, hi-hat, bass, synth)
-- 🥁 **Beat Making**: Generate drum patterns (trap, house, techno, DnB, and more)
-- 🎚️ **Audio Effects**: Apply professional effects (reverb, delay, distortion, chorus, filters)
-- 🎛️ **Audio Mixing**: Mix and crossfade multiple audio files
-- 📊 **Audio Analysis**: Analyze BPM, key, duration, and more
-- 🎪 **Interactive Demo**: Try out all features with built-in demos
+### 🎼 Automatic Composition
+- **Auto-Compose Complete Tracks**: Generate full songs with drums, bass, chords, and melody
+- **Multiple Genres**: lofi, electro, funk, relax, ambient, synthwave, and more
+- **Music Theory Engine**: Chord progressions, scales, and harmonic structures
+- **Continuous Generation**: Create evolving, non-repetitive music of any length
+- **Mixtapes**: Generate multi-genre mixes with smooth transitions
+
+### 🎹 Manual Sound Design
+- **Sound Generation**: Create synthesized sounds (kick, snare, hi-hat, bass, synth)
+- **Beat Making**: Generate drum patterns (trap, house, techno, DnB, and more)
+- **Audio Effects**: Apply professional effects (reverb, delay, distortion, chorus, filters)
+- **Audio Mixing**: Mix and crossfade multiple audio files
+- **Audio Analysis**: Analyze BPM, key, duration, and more
 
 ## 📦 Installation
 
@@ -49,20 +56,34 @@ pip install -r requirements.txt
 
 ## 🚀 Quick Start
 
-### Run the CLI
+### 🎼 Automatic Music Generation (NEW!)
 
 ```bash
-# Show help
-python src/main.py --help
+# Auto-compose a lofi track
+python src/main.py compose --genre lofi --bars 16 --key C -o lofi_track.wav
 
-# List available sounds and patterns
-python src/main.py sounds
+# Generate continuous music (60 seconds)
+python src/main.py auto --genre electro --duration 60 -o electro.wav
 
-# Run interactive demo
-python src/main.py demo
+# Create a multi-genre mixtape
+python src/main.py mixtape "lofi,electro,funk" --bars 16 -o mixtape.wav
+
+# List available genres
+python src/main.py genres
 ```
 
-### Generate Sounds
+### Available Genres
+
+| Genre         | BPM Range | Style                   | Best For                 |
+| ------------- | --------- | ----------------------- | ------------------------ |
+| **lofi**      | 70-90     | Chill, jazzy, laid-back | Study, relax, background |
+| **electro**   | 125-135   | Electronic, energetic   | Dancing, workout         |
+| **funk**      | 100-120   | Groovy, syncopated      | Upbeat vibes             |
+| **relax**     | 60-80     | Calm, peaceful          | Meditation, sleep        |
+| **ambient**   | 60-90     | Atmospheric, spacious   | Background, focus        |
+| **synthwave** | 125-135   | Retro, 80s inspired     | Driving, nostalgia       |
+
+### 🎹 Manual Sound Design
 
 ```bash
 # Generate a kick drum
@@ -145,16 +166,26 @@ python src/main.py play track.wav --loop
 
 ## 📚 Available Commands
 
-| Command    | Description                                                                       |
-| ---------- | --------------------------------------------------------------------------------- |
-| `generate` | Generate synthesized sounds (kick, snare, hihat, bass, synth, noise)              |
-| `beat`     | Create drum beats with various patterns                                           |
-| `effect`   | Apply audio effects (reverb, delay, distortion, chorus, filter, phaser, bitcrush) |
-| `mix`      | Mix multiple audio files together                                                 |
-| `analyze`  | Analyze audio properties (BPM, key, duration)                                     |
-| `play`     | Play audio files                                                                  |
-| `sounds`   | List all available sounds and beat patterns                                       |
-| `demo`     | Run an interactive demo                                                           |
+### 🎼 Auto-Composition Commands
+
+| Command   | Description                                                        |
+| --------- | ------------------------------------------------------------------ |
+| `compose` | Auto-compose a complete track with drums, bass, chords, and melody |
+| `auto`    | Generate continuous, evolving music with song structure            |
+| `mixtape` | Create multi-genre mixtapes with transitions                       |
+| `genres`  | List all available genres and their characteristics                |
+
+### 🎹 Manual Creation Commands
+
+| Command    | Description                                                          |
+| ---------- | -------------------------------------------------------------------- |
+| `generate` | Generate synthesized sounds (kick, snare, hihat, bass, synth, noise) |
+| `beat`     | Create drum beats with various patterns                              |
+| `effect`   | Apply audio effects (reverb, delay, distortion, chorus, filter)      |
+| `mix`      | Mix multiple audio files together                                    |
+| `analyze`  | Analyze audio properties (BPM, key, duration)                        |
+| `play`     | Play audio files                                                     |
+| `sounds`   | List all available sounds and beat patterns                          |
 
 ## 🎼 Available Sounds
 
@@ -185,28 +216,45 @@ python src/main.py play track.wav --loop
 
 ## 🧪 Examples
 
-### Create a Complete Track
+### 🎼 Auto-Generate Complete Tracks
 
 ```bash
-# 1. Generate drum sounds
-python src/main.py generate kick -o kick.wav
-python src/main.py generate snare -o snare.wav
+# Generate a 30-second lofi study track
+python src/main.py auto --genre lofi --duration 30 -o lofi_study.wav
 
-# 2. Create a beat
-python src/main.py beat --bpm 140 --pattern trap --bars 8 -o beat.wav
+# Create an electro workout mix (2 minutes)
+python src/main.py auto --genre electro --duration 120 -o workout.wav
 
-# 3. Generate a bassline
-python src/main.py generate bass --freq 80 -d 8.0 -o bass.wav
+# Generate ambient meditation music (5 minutes)
+python src/main.py auto --genre ambient --duration 300 -o meditation.wav
 
-# 4. Apply effects
-python src/main.py effect beat.wav reverb --mix 0.3 -o beat_reverb.wav
-python src/main.py effect bass.wav filter --intensity 0.4 -o bass_filtered.wav
+# Create a multi-genre mixtape
+python src/main.py mixtape "lofi,relax,ambient" --bars 16 -o chill_mix.wav
+```
 
-# 5. Mix everything together
-python src/main.py mix beat_reverb.wav bass_filtered.wav -o final_track.wav
+### 🎵 Auto-Composition with Custom Structure
 
-# 6. Analyze the result
-python src/main.py analyze final_track.wav
+```bash
+# Compose with specific song structure
+python src/main.py auto --genre funk \
+  --structure "intro:4,verse:8,chorus:8,verse:8,outro:4" \
+  -o funk_song.wav
+
+# Generate in a specific musical key
+python src/main.py compose --genre synthwave --key F --bars 32 -o synthwave.wav
+```
+
+### 🎹 Manual Track Creation
+
+```bash
+# 1. Auto-compose a base track
+python src/main.py compose --genre electro --bars 16 -o base.wav
+
+# 2. Apply effects
+python src/main.py effect base.wav reverb --mix 0.4 -o base_reverb.wav
+
+# 3. Analyze the result
+python src/main.py analyze base_reverb.wav
 ```
 
 ## 📁 Project Structure
@@ -217,9 +265,12 @@ dj-cli/
 │   ├── __init__.py
 │   ├── main.py           # CLI entry point
 │   ├── audio_engine.py   # Audio playback and processing
-│   ├── sounds.py         # Sound generation
-│   ├── beat_maker.py     # Beat creation
-│   └── effects.py        # Audio effects
+│   ├── music_theory.py   # Music theory (scales, chords, progressions)
+│   ├── composer.py       # Automatic composition engine
+│   ├── continuous.py     # Continuous music generation
+│   ├── sounds.py         # Sound synthesis
+│   ├── beat_maker.py     # Beat/rhythm creation
+│   └── effects.py        # Audio effects processor
 ├── samples/              # Generated samples
 ├── tests/                # Unit tests
 ├── requirements.txt      # Python dependencies

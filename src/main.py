@@ -272,6 +272,151 @@ def demo():
             raise typer.Exit(1)
 
 
+@app.command()
+def compose(
+    genre: str = typer.Option("lofi", "--genre", "-g", help="Music genre: lofi, electro, funk, relax, ambient, synthwave"),
+    bars: int = typer.Option(16, "--bars", "-b", help="Track length in bars"),
+    key: str = typer.Option("C", "--key", "-k", help="Musical key (C, D, E, F, G, A, etc.)"),
+    output: str = typer.Option("composition.wav", "--output", "-o", help="Output file"),
+):
+    """
+    🎼 Auto-compose a complete music track
+    
+    Automatically generates drums, bass, chords, and melody for a complete track.
+    
+    Available genres: lofi, electro, funk, relax, ambient, synthwave
+    
+    Example: dj-cli compose --genre lofi --bars 16 --key C -o lofi_track.wav
+    """
+    from src.composer import AutoComposer
+    
+    console.print(f"[cyan]🎼 Composing {genre} track in key of {key}...[/cyan]")
+    console.print(f"[dim]Length: {bars} bars | Style: {genre}[/dim]\n")
+    
+    try:
+        composer = AutoComposer()
+        
+        with console.status("[bold cyan]Composing track..."):
+            track = composer.compose_track(genre, bars, key)
+        
+        console.print("[cyan]💾 Exporting track...[/cyan]")
+        track.export(output, format="wav")
+        
+        console.print(f"[bold green]✓ Track composed and saved to {output}[/bold green]")
+        console.print(f"[dim]Duration: {len(track) / 1000:.1f} seconds[/dim]")
+    except Exception as e:
+        console.print(f"[red]✗ Error: {e}[/red]")
+        raise typer.Exit(1)
+
+
+@app.command()
+def auto(
+    genre: str = typer.Option("lofi", "--genre", "-g", help="Music genre"),
+    duration: int = typer.Option(60, "--duration", "-d", help="Duration in seconds (approximate)"),
+    key: Optional[str] = typer.Option(None, "--key", "-k", help="Musical key (auto if not specified)"),
+    structure: Optional[str] = typer.Option(None, "--structure", "-s", help="Song structure (e.g., intro:4,verse:8,chorus:8)"),
+    output: str = typer.Option("auto_track.wav", "--output", "-o", help="Output file"),
+):
+    """
+    🎵 Generate continuous, evolving music automatically
+    
+    Creates a full track with intro, verses, chorus, breaks, and outro.
+    
+    Example: dj-cli auto --genre electro --duration 120 -o electro_track.wav
+    """
+    from src.continuous import ContinuousGenerator
+    from src.music_theory import MusicTheory
+    
+    # Calculate bars from duration (approximate)
+    theory = MusicTheory()
+    bpm = theory.get_bpm_for_genre(genre)
+    bars = int((duration * bpm) / (60 * 4))  # 4 beats per bar
+    
+    console.print(f"[bold cyan]🎵 Auto-generating {genre} track[/bold cyan]")
+    console.print(f"[dim]Duration: ~{duration}s | BPM: ~{bpm} | Bars: {bars}[/dim]\n")
+    
+    try:
+        generator = ContinuousGenerator()
+        
+        with console.status("[bold cyan]Generating continuous music..."):
+            track = generator.generate_continuous(genre, bars, key, structure)
+        
+        console.print("[cyan]💾 Exporting track...[/cyan]")
+        track.export(output, format="wav")
+        
+        console.print(f"[bold green]✓ Auto-generated track saved to {output}[/bold green]")
+        console.print(f"[dim]Actual duration: {len(track) / 1000:.1f} seconds[/dim]")
+    except Exception as e:
+        console.print(f"[red]✗ Error: {e}[/red]")
+        raise typer.Exit(1)
+
+
+@app.command()
+def mixtape(
+    genres: str = typer.Argument(..., help="Comma-separated genres (e.g., lofi,electro,funk)"),
+    bars_each: int = typer.Option(16, "--bars", "-b", help="Bars per genre"),
+    transitions: bool = typer.Option(True, "--transitions/--no-transitions", help="Add crossfade transitions"),
+    output: str = typer.Option("mixtape.wav", "--output", "-o", help="Output file"),
+):
+    """
+    🎚️ Generate a mixtape with multiple genres
+    
+    Creates a continuous mix transitioning between different musical styles.
+    
+    Example: dj-cli mixtape "lofi,electro,funk" --bars 16 -o my_mixtape.wav
+    """
+    from src.continuous import ContinuousGenerator
+    
+    genre_list = [g.strip() for g in genres.split(',')]
+    
+    console.print(f"[bold cyan]🎚️ Creating mixtape with {len(genre_list)} genres[/bold cyan]")
+    console.print(f"[dim]Genres: {', '.join(genre_list)}[/dim]")
+    console.print(f"[dim]Bars per genre: {bars_each} | Transitions: {transitions}[/dim]\n")
+    
+    try:
+        generator = ContinuousGenerator()
+        
+        with console.status("[bold cyan]Generating mixtape..."):
+            mixtape = generator.generate_mixtape(genre_list, bars_each, transitions)
+        
+        console.print("[cyan]💾 Exporting mixtape...[/cyan]")
+        mixtape.export(output, format="wav")
+        
+        console.print(f"[bold green]✓ Mixtape saved to {output}[/bold green]")
+        console.print(f"[dim]Total duration: {len(mixtape) / 1000:.1f} seconds[/dim]")
+    except Exception as e:
+        console.print(f"[red]✗ Error: {e}[/red]")
+        raise typer.Exit(1)
+
+
+@app.command()
+def genres():
+    """
+    🎼 List available music genres and their characteristics
+    """
+    table = Table(title="🎵 Available Genres")
+    table.add_column("Genre", style="cyan", width=15)
+    table.add_column("BPM Range", style="yellow", width=12)
+    table.add_column("Style", style="white")
+    table.add_column("Best For", style="dim")
+    
+    genre_info = [
+        ("lofi", "70-90", "Chill, jazzy, laid-back", "Study, relax, background"),
+        ("electro", "125-135", "Electronic, energetic", "Dancing, workout"),
+        ("funk", "100-120", "Groovy, syncopated", "Upbeat vibes"),
+        ("relax", "60-80", "Calm, peaceful", "Meditation, sleep"),
+        ("ambient", "60-90", "Atmospheric, spacious", "Background, focus"),
+        ("synthwave", "125-135", "Retro, 80s inspired", "Driving, nostalgia"),
+    ]
+    
+    for genre, bpm, style, use in genre_info:
+        table.add_row(genre, bpm, style, use)
+    
+    console.print(table)
+    console.print()
+    console.print("[yellow]💡 Tip:[/yellow] Use [cyan]dj-cli compose --genre <name>[/cyan] to create a track")
+
+
 @app.callback(invoke_without_command=True)
 def main(
     ctx: typer.Context,
@@ -289,13 +434,17 @@ def main(
     
     if ctx.invoked_subcommand is None:
         console.print(Panel.fit(
-            "[bold cyan]🎵 DJ CLI[/bold cyan]\n\n"
+            "[bold cyan]🎵 DJ CLI - Advanced Music Generator[/bold cyan]\n\n"
             "Create music using your terminal!\n\n"
-            "[yellow]Quick Start:[/yellow]\n"
-            "  dj-cli sounds         - List available sounds\n"
-            "  dj-cli generate kick  - Generate a kick drum\n"
-            "  dj-cli beat           - Create a beat\n"
-            "  dj-cli demo           - Run demo\n\n"
+            "[yellow]🎼 Auto-Composition:[/yellow]\n"
+            "  dj-cli compose --genre lofi    - Auto-compose complete tracks\n"
+            "  dj-cli auto --duration 120     - Generate continuous music\n"
+            "  dj-cli mixtape 'lofi,electro'  - Multi-genre mixtapes\n"
+            "  dj-cli genres                  - List available genres\n\n"
+            "[yellow]🎹 Manual Creation:[/yellow]\n"
+            "  dj-cli generate kick           - Generate sounds\n"
+            "  dj-cli beat --pattern trap     - Create beats\n"
+            "  dj-cli effect track.wav reverb - Apply effects\n\n"
             "[dim]Use --help with any command for more info[/dim]",
             border_style="cyan"
         ))
