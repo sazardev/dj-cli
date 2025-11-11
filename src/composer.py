@@ -48,11 +48,38 @@ class AutoComposer:
         chords = self._generate_chords(progression, bpm, duration_bars, preset)
         melody = self._generate_melody(key, preset['scale'], bpm, duration_bars, preset)
         
+        # Add ambient texture if specified
+        if preset.get('ambient', False):
+            beat_ms = int(60000 / bpm)
+            duration_seconds = (beat_ms * 4 * duration_bars) / 1000
+            
+            # Choose texture type based on genre
+            if genre.lower() == 'lofi':
+                texture_type = 'warm'
+            elif genre.lower() in ['ambient', 'relax']:
+                texture_type = 'spacey'
+            else:
+                texture_type = 'bright'
+            
+            ambient = self.generator.generate_ambient_texture(
+                duration=duration_seconds,
+                texture_type=texture_type
+            )
+            # Trim to exact length
+            ambient = ambient[:len(drums)]
+        else:
+            ambient = AudioSegment.silent(duration=len(drums))
+        
+        # Add sub-bass for extra depth
+        sub_bass = self._generate_sub_bass(progression, bpm, duration_bars)
+        
         # Mix all elements
         track = drums
+        track = track.overlay(sub_bass - 2)  # Sub-bass sits below main bass
         track = track.overlay(bass - preset.get('bass_volume', 3))
         track = track.overlay(chords - preset.get('chord_volume', 6))
         track = track.overlay(melody - preset.get('melody_volume', 3))
+        track = track.overlay(ambient - 12)  # Ambient texture in background
         
         # Apply genre-specific effects
         track = self._apply_genre_effects(track, genre)
@@ -68,13 +95,14 @@ class AutoComposer:
                 'beat_pattern': 'lofi',
                 'melody_style': 'smooth',
                 'bass_pattern': 'root',
-                'chord_voicing': 'warm',
+                'chord_voicing': 'piano',  # Use piano for lofi
                 'melody_octave': 5,
                 'bass_volume': 4,
                 'chord_volume': 8,
                 'melody_volume': 5,
                 'swing': 0.6,
                 'reverb': 0.4,
+                'ambient': True,  # Add ambient texture
             },
             'electro': {
                 'scale': 'minor',
@@ -89,6 +117,7 @@ class AutoComposer:
                 'melody_volume': 3,
                 'swing': 0,
                 'reverb': 0.3,
+                'ambient': False,
             },
             'funk': {
                 'scale': 'minor',
@@ -96,13 +125,14 @@ class AutoComposer:
                 'beat_pattern': 'funk',
                 'melody_style': 'syncopated',
                 'bass_pattern': 'walking',
-                'chord_voicing': 'funky',
+                'chord_voicing': 'piano',  # Piano for funk too
                 'melody_octave': 5,
                 'bass_volume': 1,
                 'chord_volume': 7,
                 'melody_volume': 4,
                 'swing': 0.7,
                 'reverb': 0.2,
+                'ambient': False,
             },
             'relax': {
                 'scale': 'major',
@@ -110,13 +140,14 @@ class AutoComposer:
                 'beat_pattern': 'ambient',
                 'melody_style': 'smooth',
                 'bass_pattern': 'root',
-                'chord_voicing': 'soft',
+                'chord_voicing': 'pad',  # Use pads for relax
                 'melody_octave': 5,
                 'bass_volume': 6,
                 'chord_volume': 5,
                 'melody_volume': 4,
                 'swing': 0,
                 'reverb': 0.6,
+                'ambient': True,
             },
             'ambient': {
                 'scale': 'major',
@@ -124,13 +155,14 @@ class AutoComposer:
                 'beat_pattern': None,  # No drums
                 'melody_style': 'smooth',
                 'bass_pattern': 'root',
-                'chord_voicing': 'pad',
+                'chord_voicing': 'pad',  # Pads for ambient
                 'melody_octave': 5,
                 'bass_volume': 8,
                 'chord_volume': 4,
                 'melody_volume': 5,
                 'swing': 0,
                 'reverb': 0.8,
+                'ambient': True,
             },
             'synthwave': {
                 'scale': 'minor',
@@ -145,6 +177,7 @@ class AutoComposer:
                 'melody_volume': 2,
                 'swing': 0,
                 'reverb': 0.5,
+                'ambient': True,  # Add ambient for atmosphere
             },
         }
         
@@ -241,6 +274,36 @@ class AutoComposer:
         # Electronic, quantized, four-on-the-floor
         return self.beat_maker.create_beat(bpm, bars, 'house')
     
+    def _generate_sub_bass(self, progression: List, bpm: int, bars: int) -> AudioSegment:
+        """Generate sub-bass layer (below 100Hz)"""
+        beat_ms = int(60000 / bpm)
+        note_duration = (beat_ms * 4) / 1000  # Duration in seconds
+        
+        sub_bass_audio = AudioSegment.silent(duration=0)
+        
+        # Repeat progression for all bars
+        repeats = bars // len(progression)
+        if bars % len(progression) != 0:
+            repeats += 1
+        
+        for _ in range(repeats):
+            for root, chord_type in progression:
+                # Get root note frequency and transpose down 2 octaves
+                root_freq = self.theory.note_to_freq(root, octave=2)
+                sub_freq = int(root_freq / 2)  # One octave lower
+                
+                # Generate sub-bass
+                sub = self.generator.generate_sub_bass(
+                    frequency=sub_freq,
+                    duration=note_duration
+                )
+                
+                sub_bass_audio = sub_bass_audio + sub
+        
+        # Trim to exact length
+        total_duration = beat_ms * 4 * bars
+        return sub_bass_audio[:total_duration]
+    
     def _generate_bass(self, progression: List, bpm: int, bars: int, 
                       preset: Dict) -> AudioSegment:
         """Generate bassline"""
@@ -275,11 +338,12 @@ class AutoComposer:
     
     def _generate_chords(self, progression: List, bpm: int, bars: int,
                         preset: Dict) -> AudioSegment:
-        """Generate chord progression"""
+        """Generate chord progression with improved sound"""
         beat_ms = int(60000 / bpm)
         chord_duration = (beat_ms * 4) / 1000  # Duration in seconds
         
         chords_audio = AudioSegment.silent(duration=0)
+        voicing = preset.get('chord_voicing', 'warm')
         
         # Repeat progression for all bars
         repeats = bars // len(progression)
@@ -291,11 +355,33 @@ class AutoComposer:
                 # Get chord frequencies
                 freqs = self.theory.get_chord(root, chord_type, octave=3)
                 
-                # Generate chord
-                chord = self.generator.generate_chord(
-                    [int(f) for f in freqs], 
-                    duration=chord_duration
-                )
+                # Choose generation method based on voicing
+                if voicing == 'piano':
+                    # Use piano sound
+                    chord = AudioSegment.silent(duration=0)
+                    for freq in freqs:
+                        note = self.generator.generate_piano(
+                            int(freq), 
+                            duration=chord_duration,
+                            velocity=0.7
+                        )
+                        chord = chord.overlay(note)
+                elif voicing == 'pad':
+                    # Use ambient pad
+                    chord = AudioSegment.silent(duration=0)
+                    for freq in freqs:
+                        pad = self.generator.generate_pad(
+                            int(freq),
+                            duration=chord_duration,
+                            brightness=0.5
+                        )
+                        chord = chord.overlay(pad)
+                else:
+                    # Use standard synth chord
+                    chord = self.generator.generate_chord(
+                        [int(f) for f in freqs], 
+                        duration=chord_duration
+                    )
                 
                 chords_audio = chords_audio + chord
         

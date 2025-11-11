@@ -16,7 +16,7 @@ import os
 class EffectsProcessor:
     """Apply various audio effects to audio files"""
     
-    def __init__(self, sample_rate: int = 44100):
+    def __init__(self, sample_rate: int = 48000):  # Higher quality
         self.sample_rate = sample_rate
     
     def apply_effect(self, input_file: str, effect_type: str, 

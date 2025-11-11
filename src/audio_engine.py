@@ -15,7 +15,7 @@ import os
 class AudioEngine:
     """Main audio engine for playback and processing"""
     
-    def __init__(self, sample_rate: int = 44100):
+    def __init__(self, sample_rate: int = 48000):  # Higher quality
         self.sample_rate = sample_rate
     
     def play_file(self, file_path: str, volume: float = 1.0, loop: bool = False):
