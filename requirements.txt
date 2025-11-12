@@ -1,33 +1,56 @@
+# Core audio processing
 audioop-lts==0.2.2
 audioread==3.1.0
+pydub==0.25.1
+sounddevice>=0.4.6
+soundfile>=0.12.1
+
+# Advanced audio analysis & processing
+librosa==0.11.0
+scipy==1.16.3
+numpy==2.3.4
+scikit-learn==1.7.2
+
+# Professional effects & synthesis
+pedalboard==0.9.19
+
+# Advanced DSP & Analysis (NEW)
+resampy>=0.4.2          # High-quality resampling
+aubio>=0.4.9            # Audio analysis (onset, pitch, tempo detection)
+pywavelets>=1.4.1       # Wavelet transforms for analysis
+
+# MIDI support
+mido==1.3.3
+python-rtmidi==1.5.8
+
+# Music theory & synthesis (NEW)
+pyfluidsynth>=1.3.3     # Professional soundfont synthesis
+mingus>=0.6.1           # Advanced music theory
+
+# CLI & UI
+typer>=0.9.0
+rich==14.2.0
+click==8.3.0
+
+# Utilities
 certifi==2025.10.5
 cffi==2.0.0
 charset-normalizer==3.4.4
-click==8.3.0
 decorator==5.2.1
 idna==3.11
 joblib==1.5.2
 lazy_loader==0.4
-librosa==0.11.0
 llvmlite==0.45.1
 markdown-it-py==4.0.0
 mdurl==0.1.2
-mido==1.3.3
 msgpack==1.1.2
 numba==0.62.1
-numpy==2.3.4
 packaging==25.0
-pedalboard==0.9.19
 platformdirs==4.5.0
 pooch==1.8.2
 pycparser==2.23
-pydub==0.25.1
 Pygments==2.19.2
-python-rtmidi==1.5.8
 requests==2.32.5
-rich==14.2.0
-scikit-learn==1.7.2
-scipy==1.16.3
 shellingham==1.5.4
 sounddevice==0.5.3
 soundfile==0.13.1
