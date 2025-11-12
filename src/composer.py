@@ -6,18 +6,20 @@ from pydub import AudioSegment
 from src.music_theory import MusicTheory
 from src.sounds import SoundGenerator
 from src.beat_maker import BeatMaker
+from src.variation_engine import VariationEngine
 import random
 from typing import Dict, List, Optional
 import numpy as np
 
 
 class AutoComposer:
-    """Automatic music composition engine"""
+    """Automatic music composition engine with premium quality"""
     
     def __init__(self):
         self.theory = MusicTheory()
-        self.generator = SoundGenerator(sample_rate=48000)  # Higher quality
-        self.beat_maker = BeatMaker(sample_rate=48000)
+        self.generator = SoundGenerator(sample_rate=96000)  # Premium 96kHz
+        self.beat_maker = BeatMaker(sample_rate=96000)
+        self.variation_engine = VariationEngine()
     
     def compose_track(self, genre: str = 'lofi', duration_bars: int = 16,
                      key: str = 'C', variation: str = 'medium') -> AudioSegment:
@@ -391,40 +393,86 @@ class AutoComposer:
     
     def _generate_melody(self, key: str, scale: str, bpm: int, bars: int,
                         preset: Dict) -> AudioSegment:
-        """Generate melody"""
+        """Generate melody with intelligent variations"""
         # Get scale notes
         octave = preset.get('melody_octave', 5)
         scale_notes = self.theory.get_scale_notes(key, scale, octave)
         
-        # Extend scale to multiple octaves
-        scale_notes_extended = scale_notes + [
-            (n, f * 2) for n, f in scale_notes
-        ]
+        # Extend scale to multiple octaves for range
+        scale_notes_extended = []
+        for octave_shift in [-1, 0, 1]:
+            for note_name, freq in scale_notes:
+                shifted_freq = freq * (2 ** octave_shift)
+                scale_notes_extended.append((note_name, shifted_freq))
         
-        # Generate melody pattern
+        # Generate intelligent melodic contour
         notes_per_bar = 8  # Eighth notes
         total_notes = bars * notes_per_bar
         
         melody_style = preset.get('melody_style', 'smooth')
-        melody_freqs = self.theory.generate_melody(
-            scale_notes_extended, 
-            total_notes, 
-            melody_style
+        
+        # Use variation engine for intelligent contour
+        key_center = len(scale_notes)  # Middle octave
+        melody_indices = self.variation_engine.generate_melodic_contour(
+            scale_notes_extended,
+            total_notes,
+            melody_style,
+            key_center
         )
         
-        # Generate audio
+        # Generate velocity curve for musical dynamics
+        velocities = self.variation_engine.generate_velocity_curve(
+            total_notes,
+            dynamics='varied'
+        )
+        
+        # Generate audio with premium quality
         beat_ms = int(60000 / bpm)
         note_duration = (beat_ms / 2) / 1000  # Eighth note in seconds
         
         melody_audio = AudioSegment.silent(duration=0)
         
-        for freq in melody_freqs:
-            # Random note duration variation
-            duration = note_duration * random.uniform(0.8, 1.0)
-            note = self.generator.generate_synth(duration, int(freq), 'sine')
+        for i, note_idx in enumerate(melody_indices):
+            if note_idx >= len(scale_notes_extended):
+                note_idx = len(scale_notes_extended) - 1
             
-            # Add gap between notes
-            gap = int((note_duration * 1000) - len(note))
+            note_name, freq = scale_notes_extended[note_idx]
+            
+            # Intelligent duration variation (not random)
+            if i % 4 == 3:  # Longer notes at phrase ends
+                duration = note_duration * 1.5
+            elif i % 2 == 1:  # Slightly shorter on off-beats
+                duration = note_duration * 0.9
+            else:
+                duration = note_duration
+            
+            # Use piano for certain genres, synth for others
+            voicing = preset.get('chord_voicing', 'synth')
+            variation_amount = random.uniform(0.3, 0.7)  # Humanization
+            
+            if voicing == 'piano':
+                note = self.generator.generate_piano(
+                    int(freq), 
+                    duration, 
+                    velocity=velocities[i],
+                    variation=variation_amount
+                )
+            else:
+                note = self.generator.generate_synth(
+                    duration, 
+                    int(freq), 
+                    'sine'
+                )
+                # Apply velocity
+                note = note - (20 * (1 - velocities[i]))
+            
+            # Intelligent gap (articulation)
+            if i % 4 == 0:  # Legato on strong beats
+                gap_ratio = 0.05
+            else:  # More staccato otherwise
+                gap_ratio = 0.15
+            
+            gap = int((note_duration * 1000) - len(note) + (note_duration * 1000 * gap_ratio))
             if gap > 0:
                 note = note + AudioSegment.silent(duration=gap)
             

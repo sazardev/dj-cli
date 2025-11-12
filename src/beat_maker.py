@@ -8,9 +8,9 @@ from typing import List, Dict
 
 
 class BeatMaker:
-    """Create drum beats and patterns"""
+    """Create drum beats and patterns with premium quality"""
     
-    def __init__(self, sample_rate: int = 48000):  # Higher quality
+    def __init__(self, sample_rate: int = 96000):  # Premium quality
         self.sample_rate = sample_rate
         self.generator = SoundGenerator(sample_rate)
     
