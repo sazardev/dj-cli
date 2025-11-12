@@ -504,51 +504,18 @@ class SoundGenerator:
             
             signal += harmonic_signal * harmonic_env
         
-        # Advanced ADSR Envelope with realistic piano characteristics
-        attack_time = 0.008 + random.uniform(-0.002, 0.002) * variation  # 6-10ms
-        decay_time = 0.12 + random.uniform(-0.02, 0.02) * variation      # 100-140ms
-        sustain_level = 0.65 + random.uniform(-0.05, 0.05) * variation   # 60-70%
-        release_time = 0.35 + random.uniform(-0.05, 0.05) * variation    # 300-400ms
+        # Simplified ADSR Envelope (more robust, no buffer overflow)
+        # Fast attack, medium decay, long release for piano
+        envelope = np.ones(samples)
         
-        attack_samples = int(attack_time * self.sample_rate)
-        decay_samples = int(decay_time * self.sample_rate)
-        release_samples = int(release_time * self.sample_rate)
-        sustain_samples = samples - attack_samples - decay_samples - release_samples
+        # Attack (first 1%)
+        attack_samples = max(1, int(samples * 0.01))
+        if attack_samples < samples:
+            envelope[:attack_samples] = np.linspace(0, 1, attack_samples) ** 0.5
         
-        if sustain_samples < 0:
-            sustain_samples = 0
-            release_samples = samples - attack_samples - decay_samples
-        
-        envelope = np.zeros(samples)
-        idx = 0
-        
-        # Attack - exponential curve for natural piano strike
-        if attack_samples > 0:
-            attack_curve = 1 - np.exp(-5 * np.linspace(0, 1, attack_samples))
-            envelope[idx:idx+attack_samples] = attack_curve
-            idx += attack_samples
-        
-        # Decay - logarithmic curve
-        if decay_samples > 0:
-            decay_curve = np.logspace(0, np.log10(sustain_level), decay_samples)
-            envelope[idx:idx+decay_samples] = decay_curve
-            idx += decay_samples
-        
-        # Sustain - with subtle vibrato
-        if sustain_samples > 0:
-            vibrato_freq = 5.5 + random.uniform(-0.5, 0.5) * variation  # 5-6 Hz
-            vibrato_depth = 0.008 * variation  # Subtle
-            sustain_curve = sustain_level * (1 + vibrato_depth * np.sin(
-                2 * np.pi * vibrato_freq * np.linspace(0, sustain_samples/self.sample_rate, sustain_samples)
-            ))
-            envelope[idx:idx+sustain_samples] = sustain_curve
-            idx += sustain_samples
-        
-        # Release - smooth exponential
-        if release_samples > 0 and idx < samples:
-            actual_release = min(release_samples, samples - idx)
-            release_curve = sustain_level * np.exp(-4 * np.linspace(0, 1, actual_release))
-            envelope[idx:idx+actual_release] = release_curve
+        # Decay + Release (exponential throughout)
+        decay_curve = np.exp(-3.5 * np.arange(samples) / samples)
+        envelope *= decay_curve
         
         # Apply envelope and velocity
         signal = signal * envelope * velocity

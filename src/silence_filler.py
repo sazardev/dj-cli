@@ -94,19 +94,34 @@ class SilenceFiller:
                 fade_in = np.linspace(0, 1, fade_length)
                 fade_out = np.linspace(1, 0, fade_length)
                 
-                if audio.channels == 2:
+                # Check if fill_audio is stereo (shape (N,2)) or mono (shape (N,))
+                if fill_audio.ndim == 2 and fill_audio.shape[1] == 2:
                     fill_audio[:fade_length, :] *= fade_in[:, np.newaxis]
                     fill_audio[-fade_length:, :] *= fade_out[:, np.newaxis]
                     
-                    # Crossfade with existing audio
-                    samples[start_sample:start_sample+fade_length] *= (1 - fade_in[:, np.newaxis])
-                    samples[end_sample-fade_length:end_sample] *= (1 - fade_out[:, np.newaxis])
+                    # Crossfade with existing audio (handle both mono and stereo)
+                    if samples.ndim == 2:
+                        samples[start_sample:start_sample+fade_length] *= (1 - fade_in[:, np.newaxis])
+                        samples[end_sample-fade_length:end_sample] *= (1 - fade_out[:, np.newaxis])
+                    else:
+                        # Convert stereo fill to mono if needed
+                        fill_audio = np.mean(fill_audio, axis=1)
+                        fill_audio[:fade_length] *= fade_in
+                        fill_audio[-fade_length:] *= fade_out
+                        samples[start_sample:start_sample+fade_length] *= (1 - fade_in)
+                        samples[end_sample-fade_length:end_sample] *= (1 - fade_out)
                 else:
                     fill_audio[:fade_length] *= fade_in
                     fill_audio[-fade_length:] *= fade_out
                     
-                    samples[start_sample:start_sample+fade_length] *= (1 - fade_in)
-                    samples[end_sample-fade_length:end_sample] *= (1 - fade_out)
+                    if samples.ndim == 2:
+                        # Expand mono fill to stereo if needed
+                        fill_audio = np.stack([fill_audio, fill_audio], axis=1)
+                        samples[start_sample:start_sample+fade_length] *= (1 - fade_in[:, np.newaxis])
+                        samples[end_sample-fade_length:end_sample] *= (1 - fade_out[:, np.newaxis])
+                    else:
+                        samples[start_sample:start_sample+fade_length] *= (1 - fade_in)
+                        samples[end_sample-fade_length:end_sample] *= (1 - fade_out)
             
             # Insert fill material
             samples[start_sample:end_sample] += fill_audio

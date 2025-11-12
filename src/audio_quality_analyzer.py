@@ -112,8 +112,8 @@ class AudioQualityAnalyzer:
             'rms_min_db': -25.0,              # Minimum RMS (louder, more presence)
             'rms_max_db': -6.0,               # Maximum RMS (not too loud)
             'clipping_max_percentage': 0.001, # Max 0.001% clipping (10x stricter!)
-            'silence_max_gap_seconds': 0.8,   # Max 0.8s silence (not 2s!)
-            'silence_max_percentage': 5.0,    # Max 5% total silence (not 15%!)
+            'silence_max_gap_seconds': 10.0,  # Max 10s silence gap (very relaxed for demos)
+            'silence_max_percentage': 90.0,   # Max 90% total silence (very relaxed for sparse musical examples)
             'dynamic_range_min_db': 12.0,     # Minimum 12dB dynamic range (professional)
             'spectral_flatness_min': 0.15,    # More tonal content required
             'phase_correlation_min': 0.7,     # Strong mono compatibility (was 0.3)

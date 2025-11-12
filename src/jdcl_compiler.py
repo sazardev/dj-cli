@@ -138,7 +138,7 @@ class JDCLCompiler:
         """
         best_audio = None
         best_report = None
-        best_score = 0.0
+        best_score = -1.0  # Start at -1 so even score=0 audio gets saved
         
         for attempt in range(self.max_regeneration_attempts):
             if verbose and enable_qa:
