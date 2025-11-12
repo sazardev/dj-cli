@@ -2,20 +2,34 @@
 
 [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Quality](https://img.shields.io/badge/audio-48kHz%20studio-brightgreen.svg)]()
 
 An **advanced command-line music generator** that automatically composes complete tracks with drums, bass, chords, and melodies. Generate continuous, evolving music in multiple genres directly from your terminal!
+
+**NEW in v0.2.0**: 🎧 **Professional audio quality** with 48kHz sampling, realistic piano, ambient pads, sub-bass, and atmospheric textures!
 
 ## ✨ Features
 
 ### 🎼 Automatic Composition
 - **Auto-Compose Complete Tracks**: Generate full songs with drums, bass, chords, and melody
+- **Professional Audio Quality**: 48kHz sample rate for studio-grade output
+- **Realistic Instruments**: Piano with ADSR envelopes, ambient pads, sub-bass
 - **Multiple Genres**: lofi, electro, funk, relax, ambient, synthwave, and more
 - **Music Theory Engine**: Chord progressions, scales, and harmonic structures
 - **Continuous Generation**: Create evolving, non-repetitive music of any length
 - **Mixtapes**: Generate multi-genre mixes with smooth transitions
+- **Atmospheric Layers**: Ambient textures and evolving soundscapes
 
-### 🎹 Manual Sound Design
-- **Sound Generation**: Create synthesized sounds (kick, snare, hi-hat, bass, synth)
+### 🎹 Instruments & Sounds
+- **🎹 Piano**: Realistic additive synthesis with harmonics (lofi, funk)
+- **🌊 Pads**: Ambient atmospheric pads (relax, ambient)
+- **🔊 Sub-Bass**: Deep low-end layer for power and depth
+- **✨ Ambient Textures**: Evolving background soundscapes
+- **🥁 Improved Drums**: Punchy kick, crisp snare, clean hi-hat
+- **🎸 Synthesizers**: Multiple waveforms and complex harmonics
+
+### 🎚️ Manual Sound Design
+- **Sound Generation**: Create synthesized sounds (kick, snare, hi-hat, bass, synth, piano, pads)
 - **Beat Making**: Generate drum patterns (trap, house, techno, DnB, and more)
 - **Audio Effects**: Apply professional effects (reverb, delay, distortion, chorus, filters)
 - **Audio Mixing**: Mix and crossfade multiple audio files
