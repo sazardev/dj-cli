@@ -53,8 +53,8 @@ class JDCLCompiler:
         # Cache for generated sounds
         self.sound_cache: Dict[str, AudioSegment] = {}
         
-        # Quality settings
-        self.max_regeneration_attempts = 3
+        # Quality settings (STRICTER STANDARDS!)
+        self.max_regeneration_attempts = 5  # More chances (was 3)
         self.enable_auto_fix = True
         self.enable_humanization = True
         self.enable_mastering = True
@@ -208,11 +208,11 @@ class JDCLCompiler:
             
             audio = self.humanizer.humanize_audio(
                 audio,
-                timing_drift=0.3,
-                velocity_variation=0.25,
-                pitch_wobble=0.15,
-                groove_amount=0.35,
-                analog_warmth=0.3
+                timing_drift=0.6,         # INCREASED (was 0.3)
+                velocity_variation=0.35,  # INCREASED (was 0.25)
+                pitch_wobble=0.25,        # INCREASED (was 0.15)
+                groove_amount=0.6,        # INCREASED (was 0.35)
+                analog_warmth=0.5         # INCREASED (was 0.3)
             )
             
             # Add room ambience
@@ -244,7 +244,7 @@ class JDCLCompiler:
             
             audio = self.mastering.master_audio(
                 audio,
-                target_lufs=-14.0,
+                target_lufs=-11.0,        # LOUDER! (was -14.0) - club/radio standard
                 target_style=mastering_style,
                 apply_saturation=True,
                 enhance_stereo=True,

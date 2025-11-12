@@ -23,20 +23,20 @@ class SilenceFiller:
         self.sample_rate = sample_rate
     
     def fill_silence_gaps(self, audio: AudioSegment,
-                         min_gap_duration: float = 0.5,
+                         min_gap_duration: float = 0.3,  # STRICTER! (was 0.5s)
                          fill_style: str = "smart",
-                         fill_volume: float = 0.3) -> AudioSegment:
+                         fill_volume: float = 0.35) -> AudioSegment:  # More present (was 0.3)
         """
-        Detect and fill silence gaps
+        Detect and fill silence gaps (STRICT DETECTION)
         
         Args:
             audio: Input AudioSegment
-            min_gap_duration: Minimum gap duration to fill (seconds)
-            fill_style: "vinyl", "ambient", "room", "smart" (auto-detect)
-            fill_volume: Volume of fill material (0.0-1.0)
+            min_gap_duration: Minimum gap duration to fill (seconds) - NOW STRICTER
+            fill_style: "vinyl", "ambient", "room", "smart" (intelligent auto-detect)
+            fill_volume: Volume of fill material (0.0-1.0) - NOW MORE PRESENT
         
         Returns:
-            AudioSegment with filled gaps
+            AudioSegment with professionally filled gaps
         """
         # Detect silence gaps
         gaps = self._detect_silence_gaps(audio, min_gap_duration)
@@ -139,8 +139,8 @@ class SilenceFiller:
             samples = samples.reshape(-1, 2)
             samples = np.mean(samples, axis=1)
         
-        # Silence threshold (-60dB)
-        silence_threshold = 0.001
+        # Silence threshold (STRICTER: -55dB instead of -60dB)
+        silence_threshold = 0.0018  # Catch more subtle gaps
         
         # Detect silent regions
         is_silent = np.abs(samples) < silence_threshold

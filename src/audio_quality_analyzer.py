@@ -1,6 +1,7 @@
 """
 Audio Quality Analyzer - Intelligent audio analysis and validation
 Analyzes peaks, saturation, silences, spectral coherence, frequency balance
+WITH PROFESSIONAL LUFS METERING
 """
 
 import numpy as np
@@ -8,6 +9,14 @@ from scipy import signal, fft
 from pydub import AudioSegment
 from typing import Dict, List, Tuple, Optional
 import warnings
+
+# Professional loudness metering
+try:
+    import pyloudnorm as pyln
+    LUFS_AVAILABLE = True
+except ImportError:
+    LUFS_AVAILABLE = False
+    print("⚠ pyloudnorm not available, LUFS metering disabled")
 
 
 class AudioQualityReport:
@@ -47,6 +56,11 @@ class AudioQualityReport:
         # Stereo Analysis
         self.stereo_width: float = 0.0
         self.phase_correlation: float = 0.0
+        
+        # Professional Loudness Metering (LUFS)
+        self.integrated_lufs: float = 0.0   # Overall loudness
+        self.true_peak_db: float = 0.0       # True peak (inter-sample)
+        self.loudness_range_lu: float = 0.0  # LRA (dynamic range in Loudness Units)
         
         # Quality Scores
         self.overall_score: float = 0.0  # 0-100
@@ -92,17 +106,19 @@ class AudioQualityAnalyzer:
     def __init__(self, sample_rate: int = 96000):
         self.sample_rate = sample_rate
         
-        # Quality thresholds
+        # Quality thresholds (PROFESSIONAL PRODUCTION STANDARDS - STRICT!)
         self.thresholds = {
-            'peak_max_db': -0.5,              # Maximum peak level
-            'rms_min_db': -30.0,              # Minimum RMS (not too quiet)
+            'peak_max_db': -0.3,              # Maximum peak level (broadcast standard)
+            'rms_min_db': -25.0,              # Minimum RMS (louder, more presence)
             'rms_max_db': -6.0,               # Maximum RMS (not too loud)
-            'clipping_max_percentage': 0.01,  # Max 0.01% clipping
-            'silence_max_gap_seconds': 2.0,   # Max 2 seconds of silence
-            'silence_max_percentage': 15.0,   # Max 15% total silence
-            'dynamic_range_min_db': 6.0,      # Minimum dynamic range
-            'spectral_flatness_min': 0.1,     # Avoid pure tones
-            'phase_correlation_min': 0.3,     # Avoid phase issues
+            'clipping_max_percentage': 0.001, # Max 0.001% clipping (10x stricter!)
+            'silence_max_gap_seconds': 0.8,   # Max 0.8s silence (not 2s!)
+            'silence_max_percentage': 5.0,    # Max 5% total silence (not 15%!)
+            'dynamic_range_min_db': 12.0,     # Minimum 12dB dynamic range (professional)
+            'spectral_flatness_min': 0.15,    # More tonal content required
+            'phase_correlation_min': 0.7,     # Strong mono compatibility (was 0.3)
+            'stereo_width_min': 40.0,         # At least 40% stereo width
+            'frequency_balance_tolerance': 3.0, # ±3dB frequency balance (strict!)
         }
     
     def analyze(self, audio: AudioSegment, verbose: bool = True) -> AudioQualityReport:
@@ -141,7 +157,12 @@ class AudioQualityAnalyzer:
         # 3. Silence Gap Detection
         self._analyze_silence_gaps(mono, report, audio.duration_seconds)
         
-        # 4. Spectral Analysis
+        # 4. Professional LUFS Metering
+        if LUFS_AVAILABLE:
+            self._analyze_lufs(samples if audio.channels == 2 else mono.reshape(-1, 1), 
+                              report, audio.frame_rate)
+        
+        # 5. Spectral Analysis
         self._analyze_spectrum(mono, report)
         
         # 5. Frequency Balance Analysis
@@ -190,6 +211,39 @@ class AudioQualityAnalyzer:
         near_clipping_threshold = 0.95
         near_clipped = np.sum(np.abs(samples) >= near_clipping_threshold)
         report.near_clipping_percentage = (near_clipped / len(samples)) * 100.0
+    
+    def _analyze_lufs(self, samples: np.ndarray, report: AudioQualityReport, sample_rate: int):
+        """
+        Measure professional loudness standards (ITU-R BS.1770)
+        """
+        try:
+            # Create loudness meter
+            meter = pyln.Meter(sample_rate)
+            
+            # Integrated loudness (overall loudness)
+            report.integrated_lufs = meter.integrated_loudness(samples)
+            
+            # True peak (inter-sample peaks using oversampling)
+            if samples.ndim == 1:
+                samples_2d = samples.reshape(-1, 1)
+            else:
+                samples_2d = samples
+            
+            # Calculate true peak for each channel
+            true_peaks = []
+            for channel in range(samples_2d.shape[1]):
+                channel_data = samples_2d[:, channel]
+                # Upsample 4x for true peak detection
+                upsampled = signal.resample(channel_data, len(channel_data) * 4)
+                peak = np.max(np.abs(upsampled))
+                true_peaks.append(20 * np.log10(peak) if peak > 0 else -np.inf)
+            
+            report.true_peak_db = max(true_peaks)
+            
+        except Exception as e:
+            print(f"⚠ LUFS measurement error: {e}")
+            report.integrated_lufs = -14.0  # Default fallback
+            report.true_peak_db = -1.0
     
     def _analyze_silence_gaps(self, samples: np.ndarray, report: AudioQualityReport, 
                              duration_seconds: float):
@@ -349,48 +403,74 @@ class AudioQualityAnalyzer:
             report.phase_correlation = numerator / denominator
     
     def _calculate_score(self, report: AudioQualityReport):
-        """Calculate overall quality score (0-100)"""
+        """Calculate overall quality score (0-100) - STRICT PROFESSIONAL STANDARDS"""
         score = 100.0
         
-        # Penalties
+        # STRICT PENALTIES FOR PRODUCTION QUALITY
         
-        # 1. Clipping (severe penalty)
-        if report.clipping_percentage > 0.01:
-            score -= min(50.0, report.clipping_percentage * 100)
+        # 1. Clipping (SEVERE penalty - unacceptable in production)
+        if report.clipping_percentage > self.thresholds['clipping_max_percentage']:
+            score -= min(60.0, report.clipping_percentage * 1000)  # 10x stricter
         
-        # 2. Silence gaps (moderate penalty)
+        # 2. Silence gaps (STRICT penalty)
         if report.total_silence_percentage > self.thresholds['silence_max_percentage']:
             excess = report.total_silence_percentage - self.thresholds['silence_max_percentage']
-            score -= min(30.0, excess * 2)
+            score -= min(40.0, excess * 5)  # Stricter penalty (was * 2)
         
-        # 3. Long silence gaps (severe penalty)
+        # 3. Long silence gaps (SEVERE penalty)
         if report.longest_silence_duration > self.thresholds['silence_max_gap_seconds']:
-            score -= min(25.0, (report.longest_silence_duration - self.thresholds['silence_max_gap_seconds']) * 10)
+            score -= min(35.0, (report.longest_silence_duration - self.thresholds['silence_max_gap_seconds']) * 20)  # 2x penalty
         
-        # 4. Poor dynamic range
+        # 4. Poor dynamic range (CRITICAL for professional sound)
         if report.dynamic_range_db < self.thresholds['dynamic_range_min_db']:
-            score -= min(15.0, (self.thresholds['dynamic_range_min_db'] - report.dynamic_range_db) * 2)
+            score -= min(30.0, (self.thresholds['dynamic_range_min_db'] - report.dynamic_range_db) * 3)  # 1.5x stricter
         
-        # 5. Peak too hot
+        # 5. Peak too hot (STRICT headroom requirement)
         if report.peak_level_db > self.thresholds['peak_max_db']:
-            score -= min(20.0, (report.peak_level_db - self.thresholds['peak_max_db']) * 10)
+            score -= min(30.0, (report.peak_level_db - self.thresholds['peak_max_db']) * 20)  # 2x penalty
         
-        # 6. RMS too quiet or too loud
+        # 6. RMS too quiet (needs presence and loudness)
         if report.rms_level_db < self.thresholds['rms_min_db']:
-            score -= min(10.0, (self.thresholds['rms_min_db'] - report.rms_level_db) / 2)
+            score -= min(20.0, (self.thresholds['rms_min_db'] - report.rms_level_db) * 1.5)  # 3x stricter
         if report.rms_level_db > self.thresholds['rms_max_db']:
             score -= min(10.0, (report.rms_level_db - self.thresholds['rms_max_db']) * 2)
         
         # 7. Poor spectral flatness (too pure/synthetic)
         if report.spectral_flatness < self.thresholds['spectral_flatness_min']:
-            score -= min(10.0, (self.thresholds['spectral_flatness_min'] - report.spectral_flatness) * 20)
+            score -= min(15.0, (self.thresholds['spectral_flatness_min'] - report.spectral_flatness) * 30)  # Stricter
         
-        # 8. Phase correlation issues
+        # 8. Phase correlation issues (CRITICAL for mono compatibility)
         if report.phase_correlation < self.thresholds['phase_correlation_min']:
-            score -= min(10.0, (self.thresholds['phase_correlation_min'] - report.phase_correlation) * 20)
+            score -= min(25.0, (self.thresholds['phase_correlation_min'] - report.phase_correlation) * 40)  # 2x stricter
+        
+        # 9. Stereo width too narrow (professional requirement)
+        if report.stereo_width < self.thresholds['stereo_width_min']:
+            score -= min(15.0, (self.thresholds['stereo_width_min'] - report.stereo_width) / 2)
+        
+        # 10. Frequency balance issues (check all bands)
+        if hasattr(report, 'frequency_balance') and report.frequency_balance:
+            avg_energy = sum(report.frequency_balance.values()) / len(report.frequency_balance)
+            for band, energy in report.frequency_balance.items():
+                deviation_db = abs(20 * np.log10(energy / avg_energy)) if energy > 0 and avg_energy > 0 else 0
+                if deviation_db > self.thresholds['frequency_balance_tolerance']:
+                    score -= min(5.0, (deviation_db - self.thresholds['frequency_balance_tolerance']) * 2)
+        
+        # 11. LUFS loudness check (PROFESSIONAL STANDARD)
+        if LUFS_AVAILABLE and report.integrated_lufs != 0.0:
+            # Streaming: -16 LUFS ideal, -14 acceptable
+            # Club/Radio: -11 to -9 LUFS
+            # Check if too quiet (< -20 LUFS) or ridiculously loud (> -6 LUFS)
+            if report.integrated_lufs < -20.0:
+                score -= min(20.0, (-20.0 - report.integrated_lufs) * 2)  # Too quiet penalty
+            elif report.integrated_lufs > -6.0:
+                score -= min(15.0, (report.integrated_lufs + 6.0) * 3)  # Too loud penalty
+            
+            # True peak check (must be < -1.0 dBTP for streaming)
+            if report.true_peak_db > -0.5:
+                score -= min(25.0, (report.true_peak_db + 0.5) * 20)  # Severe penalty
         
         report.overall_score = max(0.0, score)
-        report.passed = report.overall_score >= 70.0  # Pass threshold
+        report.passed = report.overall_score >= 85.0  # STRICT! 85/100 minimum (was 70)
     
     def _generate_issues(self, report: AudioQualityReport):
         """Generate human-readable issues and warnings"""

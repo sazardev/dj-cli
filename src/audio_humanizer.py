@@ -23,24 +23,24 @@ class AudioHumanizer:
         self.sample_rate = sample_rate
     
     def humanize_audio(self, audio: AudioSegment, 
-                      timing_drift: float = 0.3,
-                      velocity_variation: float = 0.2,
-                      pitch_wobble: float = 0.15,
-                      groove_amount: float = 0.4,
-                      analog_warmth: float = 0.3) -> AudioSegment:
+                      timing_drift: float = 0.6,         # Increased from 0.3
+                      velocity_variation: float = 0.35,   # Increased from 0.2
+                      pitch_wobble: float = 0.25,        # Increased from 0.15
+                      groove_amount: float = 0.6,        # Increased from 0.4
+                      analog_warmth: float = 0.5) -> AudioSegment:  # Increased from 0.3
         """
-        Apply comprehensive humanization
+        Apply DEEP comprehensive humanization (PROFESSIONAL STANDARDS)
         
         Args:
             audio: Input AudioSegment
-            timing_drift: Amount of timing variation (0.0-1.0)
-            velocity_variation: Amount of volume variation (0.0-1.0)
-            pitch_wobble: Amount of pitch variation (0.0-1.0)
-            groove_amount: Amount of groove/swing (0.0-1.0)
-            analog_warmth: Amount of analog-style warmth (0.0-1.0)
+            timing_drift: Amount of timing variation (0.0-1.0) - NOW MORE AGGRESSIVE
+            velocity_variation: Amount of volume variation (0.0-1.0) - NOW MORE DYNAMIC
+            pitch_wobble: Amount of pitch variation (0.0-1.0) - NOW MORE NATURAL
+            groove_amount: Amount of groove/swing (0.0-1.0) - NOW MORE PRONOUNCED
+            analog_warmth: Amount of analog-style warmth (0.0-1.0) - NOW MORE AUTHENTIC
         
         Returns:
-            Humanized AudioSegment
+            Deeply Humanized AudioSegment with professional natural feel
         """
         samples = np.array(audio.get_array_of_samples(), dtype=np.float32)
         samples = samples / (2**15)  # Normalize
@@ -153,8 +153,8 @@ class AudioHumanizer:
         output = np.zeros_like(samples)
         
         for i, peak in enumerate(peaks):
-            # Random timing shift (-amount to +amount milliseconds)
-            shift_ms = (random.random() * 2 - 1) * amount * 5  # ±5ms max
+            # Random timing shift (MUCH MORE AGGRESSIVE for natural feel)
+            shift_ms = (random.random() * 2 - 1) * amount * 15  # ±15ms max (was 5ms)
             shift_samples = int(shift_ms * self.sample_rate / 1000)
             
             # Determine segment boundaries
@@ -202,9 +202,9 @@ class AudioHumanizer:
         duration = len(samples) / self.sample_rate
         num_points = int(duration * 4)  # 4 points per second
         
-        # Generate random velocity points
-        velocities = 1.0 + (np.random.randn(num_points) * amount * 0.15)
-        velocities = np.clip(velocities, 0.85, 1.15)
+        # Generate random velocity points (MORE DYNAMIC RANGE)
+        velocities = 1.0 + (np.random.randn(num_points) * amount * 0.30)  # 30% variation (was 15%)
+        velocities = np.clip(velocities, 0.70, 1.30)  # Wider range (was 0.85-1.15)
         
         # Interpolate to full length
         x_points = np.linspace(0, len(samples)-1, num_points)

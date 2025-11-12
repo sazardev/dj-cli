@@ -29,24 +29,24 @@ class AdvancedMasteringChain:
         self.sample_rate = sample_rate
     
     def master_audio(self, audio: AudioSegment,
-                    target_lufs: float = -14.0,
+                    target_lufs: float = -11.0,         # LOUDER! (was -14.0) - club standard
                     target_style: str = "balanced",
                     apply_saturation: bool = True,
                     enhance_stereo: bool = True,
                     verbose: bool = True) -> AudioSegment:
         """
-        Apply complete mastering chain
+        Apply AGGRESSIVE professional mastering chain (CLUB/RADIO READY)
         
         Args:
             audio: Input AudioSegment
-            target_lufs: Target loudness in LUFS (-23 to -9)
+            target_lufs: Target loudness in LUFS (default -11.0 for club/radio, -14.0 for streaming)
             target_style: "warm", "balanced", "bright", "aggressive"
-            apply_saturation: Add analog-style harmonic saturation
-            enhance_stereo: Enhance stereo width
+            apply_saturation: Add analog-style harmonic saturation (MORE AGGRESSIVE)
+            enhance_stereo: Enhance stereo width (MORE WIDTH)
             verbose: Print processing steps
         
         Returns:
-            Mastered AudioSegment
+            Professionally mastered AudioSegment (LOUD, PUNCHY, WIDE)
         """
         if verbose:
             print("\n🎚️  ADVANCED MASTERING CHAIN")

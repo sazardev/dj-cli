@@ -6,19 +6,32 @@
 
 An **advanced command-line music generator** that automatically composes complete tracks with drums, bass, chords, and melodies. Generate continuous, evolving music in multiple genres directly from your terminal!
 
-**NEW in v0.4.0**: � **JDCL - JSON DJ Composition Language**! Program music like code with full control over every note, pattern, and effect!
+**NEW in v0.5.0**: 🧠🎚️ **INTELLIGENT AUDIO SYSTEM**! Professional quality analysis, humanization, silence filling, and mastering with STRICT production standards!
 
-**NEW in v0.3.0**: �🎧 **Professional audio quality** with 96kHz sampling, realistic piano, FluidSynth soundfonts, physical modeling drums!
+**NEW in v0.4.0**: 🎼 **JDCL - JSON DJ Composition Language**! Program music like code with full control over every note, pattern, and effect!
+
+**NEW in v0.3.0**: 🎚️🎧 **Professional audio quality** with 96kHz sampling, realistic piano, FluidSynth soundfonts, physical modeling drums!
 
 ## ✨ Features
 
-### 🎼 JDCL - Music Programming Language (NEW!)
+### 🧠 INTELLIGENT AUDIO SYSTEM v0.5.0 (NEW!)
+- **Quality Analysis**: Strict 85/100 scoring with LUFS metering, peak detection, silence analysis
+- **Auto-Regeneration**: Up to 5 attempts to meet professional production standards
+- **Deep Humanization**: ±15ms timing drift, 30% velocity variation, pitch wobble, groove feel
+- **Silence Filling**: Intelligent ambient texture generation (detects gaps >300ms)
+- **Professional Mastering**: 6-pass chain with -11 LUFS club/radio standard
+- **LUFS Metering**: ITU-R BS.1770 compliant loudness measurement
+- **Frequency Balance**: ±3dB tolerance across 6 bands (professional mixing standard)
+- **Stereo Enhancement**: 40% minimum width, 0.7+ phase correlation
+- **[See Intelligent Audio System Docs](INTELLIGENT_AUDIO_SYSTEM.md)** for technical details
+
+### 🎼 JDCL - Music Programming Language
 - **Write Music as Code**: Create compositions using human-readable JSON
 - **Full Control**: Define every note, pattern, section, and effect
 - **Reusable Patterns**: Create loops and use them multiple times
 - **Professional Effects**: Reverb, delay, distortion, chorus, filters
 - **Version Control**: Store compositions in Git, collaborate with others
-- **Compile to Audio**: Transform .jdcli files into professional WAV files
+- **Compile to Audio**: Transform .jdcli files into PROFESSIONAL WAV files
 - **[See JDCL Documentation](JDCL_LANGUAGE.md)** for complete language reference
 
 ### 🎼 Automatic Composition

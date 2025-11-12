@@ -39,30 +39,34 @@ class SoundGenerator:
         else:
             self.pro_gen = None
         
-    def _normalize_premium(self, signal: np.ndarray, target_db: float = -6.0) -> np.ndarray:
+    def _normalize_premium(self, signal: np.ndarray, target_db: float = -3.0) -> np.ndarray:
         """
-        Premium normalization with headroom and RMS balancing
+        PROFESSIONAL normalization with proper levels for mixing
+        Optimized for AudioSegment.overlay() which reduces volume during mixing
         
         Args:
             signal: Input signal
-            target_db: Target dB level (default -6dB for headroom)
+            target_db: Target dB level (default -3dB for hot levels that survive mixing)
         
         Returns:
-            Normalized signal
+            Professionally normalized signal ready for mixing
         """
-        # Calculate RMS
-        rms = np.sqrt(np.mean(signal ** 2))
+        # Remove DC offset first (critical!)
+        signal = signal - np.mean(signal)
         
-        if rms > 0:
-            # Target RMS based on dB
-            target_rms = 10 ** (target_db / 20)
-            # Normalize to target RMS
-            signal = signal * (target_rms / rms)
+        # Calculate peak level (for drums and percussive sounds, peak normalization is more appropriate)
+        peak = np.max(np.abs(signal))
         
-        # Prevent clipping
-        max_val = np.max(np.abs(signal))
-        if max_val > 1.0:
-            signal = signal / max_val * 0.99
+        if peak > 0:
+            # Target peak based on dB
+            target_peak = 10 ** (target_db / 20)  # -3dB = 0.708 peak
+            # Normalize to target peak
+            signal = signal * (target_peak / peak)
+        
+        # Hard clip to ±0.99 to ensure NO clipping in int16 conversion
+        signal = np.clip(signal, -0.99, 0.99)
+        
+        return signal
         
         return signal
     
@@ -194,8 +198,8 @@ class SoundGenerator:
         # Combine with careful gain staging
         kick[:len(click)] += click
         
-        # Premium normalization
-        kick = self._normalize_premium(kick, target_db=-3.0)
+        # PROFESSIONAL normalization (STRICT headroom for broadcast)
+        kick = self._normalize_premium(kick)  # Use default -3dB for hot levels that survive mixing
         
         # Apply noise gate
         kick = self._apply_noise_gate(kick, threshold=0.005)
@@ -203,14 +207,14 @@ class SoundGenerator:
         # Add subtle analog warmth
         kick = self._add_subtle_analog_warmth(kick, amount=0.015)
         
-        # Convert to 24-bit integer for higher resolution
-        kick = np.int32(kick * (2**23 - 1))
+        # Convert to 16-bit integer (PROFESSIONAL STANDARD)
+        kick = np.int16(kick * (2**15 - 1))
         
-        # Convert to AudioSegment
+        # Convert to AudioSegment (16-bit for compatibility)
         audio = AudioSegment(
             kick.tobytes(),
             frame_rate=self.sample_rate,
-            sample_width=4,  # 32-bit (24-bit in container)
+            sample_width=2,  # 16-bit (professional standard)
             channels=1
         )
         
@@ -250,9 +254,9 @@ class SoundGenerator:
         envelope = np.exp(-10 * t / duration)
         snare = snare * envelope
         
-        # Normalize
-        snare = snare / np.max(np.abs(snare))
-        snare = (snare * 32767 * 0.8).astype(np.int16)
+        # Normalize with hot levels for mixing
+        snare = self._normalize_premium(snare)
+        snare = (snare * 32767).astype(np.int16)
         
         return AudioSegment(
             snare.tobytes(),
@@ -295,9 +299,9 @@ class SoundGenerator:
         envelope = np.exp(-30 * t / duration)
         hihat = hihat * envelope
         
-        # Normalize
-        hihat = hihat / np.max(np.abs(hihat))
-        hihat = (hihat * 32767 * 0.6).astype(np.int16)
+        # Normalize with hot levels for mixing
+        hihat = self._normalize_premium(hihat)
+        hihat = (hihat * 32767).astype(np.int16)
         
         return AudioSegment(
             hihat.tobytes(),
@@ -565,8 +569,8 @@ class SoundGenerator:
                     padded_signal = np.pad(signal, (delay_samples, 0))[:len(signal)]
                     signal += padded_signal * reflection_gain
         
-        # Premium normalization
-        signal = self._normalize_premium(signal, target_db=-8.0)
+        # Premium normalization with hot levels for mixing
+        signal = self._normalize_premium(signal)
         
         # Noise gate to remove any low-level artifacts
         signal = self._apply_noise_gate(signal, threshold=0.002)
@@ -574,13 +578,13 @@ class SoundGenerator:
         # Subtle analog warmth
         signal = self._add_subtle_analog_warmth(signal, amount=0.01)
         
-        # Convert to 24-bit
-        signal = np.int32(signal * (2**23 - 1))
+        # Convert to 16-bit for broadcast standard
+        signal = (signal * 32767).astype(np.int16)
         
         audio = AudioSegment(
             signal.tobytes(),
             frame_rate=self.sample_rate,
-            sample_width=4,
+            sample_width=2,
             channels=1
         )
         
@@ -635,8 +639,9 @@ class SoundGenerator:
         b, a = scipy_signal.butter(2, normalized_cutoff, btype='low')
         signal = scipy_signal.filtfilt(b, a, signal)
         
-        # Normalize
-        signal = np.int16(signal / np.max(np.abs(signal)) * 32767 * 0.7)
+        # Normalize with hot levels for mixing
+        signal = self._normalize_premium(signal)
+        signal = (signal * 32767).astype(np.int16)
         
         audio = AudioSegment(
             signal.tobytes(),
@@ -679,8 +684,9 @@ class SoundGenerator:
         
         signal = signal * envelope
         
-        # Normalize
-        signal = np.int16(signal / np.max(np.abs(signal)) * 32767 * 0.95)
+        # Normalize with hot levels for mixing
+        signal = self._normalize_premium(signal)
+        signal = (signal * 32767).astype(np.int16)
         
         audio = AudioSegment(
             signal.tobytes(),
@@ -738,8 +744,9 @@ class SoundGenerator:
         noise = np.random.randn(samples) * 0.05
         signal += noise
         
-        # Normalize
-        signal = np.int16(signal / np.max(np.abs(signal)) * 32767 * 0.6)
+        # Normalize with hot levels for mixing
+        signal = self._normalize_premium(signal)
+        signal = (signal * 32767).astype(np.int16)
         
         audio = AudioSegment(
             signal.tobytes(),
