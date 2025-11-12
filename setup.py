@@ -9,24 +9,27 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="dj-cli",
-    version="0.4.0",
+    version="0.5.0",
     author="Your Name",
     author_email="your.email@example.com",
-    description="Create professional quality music using your terminal - with JDCL language support",
+    description="Create professional quality music using your terminal - with intelligent audio processing",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/yourusername/dj-cli",
     packages=find_packages(),
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Topic :: Multimedia :: Sound/Audio",
+        "Topic :: Multimedia :: Sound/Audio :: Analysis",
+        "Topic :: Multimedia :: Sound/Audio :: Synthesis",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     python_requires=">=3.8",
     install_requires=[
@@ -42,6 +45,11 @@ setup(
         "numpy>=1.24.0",
         "scipy>=1.11.0",
         "click>=8.1.7",
+        "pyfluidsynth>=1.3.3",
+        "mingus>=0.6.1",
+        "resampy>=0.4.2",
+        "aubio>=0.4.9",
+        "pywavelets>=1.4.1",
     ],
     entry_points={
         "console_scripts": [

@@ -232,11 +232,11 @@ class AdvancedMasteringChain:
         for freq in problem_freqs:
             # Very narrow notch
             q_factor = 20
-            sos = signal.iirnotch(freq, q_factor, fs=self.sample_rate)
+            b, a = signal.iirnotch(freq, q_factor, fs=self.sample_rate)
             
             # Very subtle reduction
-            left_notched = signal.sosfilt(sos, left)
-            right_notched = signal.sosfilt(sos, right)
+            left_notched = signal.lfilter(b, a, left)
+            right_notched = signal.lfilter(b, a, right)
             
             # Blend (only 10% notch)
             left = left * 0.9 + left_notched * 0.1

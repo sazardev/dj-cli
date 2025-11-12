@@ -183,14 +183,14 @@ class JDCLCompiler:
         # Use best version
         audio = best_audio
         
-        if verbose and enable_qa:
+        if verbose and enable_qa and best_report:
             if best_report.passed:
                 print(f"\n✅ Final Quality: {best_report.overall_score:.1f}/100 - PASSED")
             else:
                 print(f"\n⚠️  Best Quality: {best_report.overall_score:.1f}/100 (improvements applied)")
         
         # === STAGE 3: Intelligent Fixes ===
-        if enable_qa and self.enable_auto_fix:
+        if enable_qa and self.enable_auto_fix and best_report:
             if verbose:
                 print("\n  📍 Stage 3: Intelligent Audio Repair")
             
@@ -224,7 +224,12 @@ class JDCLCompiler:
                 print("\n  📍 Stage 5: Professional Mastering")
             
             # Determine mastering style from genre
-            genre = composition.metadata.get('genre', 'balanced').lower()
+            genre = getattr(composition, 'genre', 'balanced')
+            if genre:
+                genre = genre.lower()
+            else:
+                genre = 'balanced'
+                
             style_map = {
                 'lofi': 'warm',
                 'funk': 'warm',
