@@ -8,13 +8,36 @@ import numpy as np
 import random
 from typing import Optional
 
+# Import professional sound generator
+try:
+    from .professional_sounds import ProfessionalSoundGenerator
+    PROFESSIONAL_MODE = True
+except ImportError:
+    PROFESSIONAL_MODE = False
+    print("⚠ Professional sounds not available, using standard synthesis")
+
 
 class SoundGenerator:
     """Generate synthesized sounds and drum samples with premium quality"""
     
-    def __init__(self, sample_rate: int = 96000):  # Premium 96kHz for maximum quality
+    def __init__(self, sample_rate: int = 96000, use_professional: bool = True):
+        """
+        Initialize sound generator
+        
+        Args:
+            sample_rate: Sample rate in Hz (default 96kHz)
+            use_professional: Use professional realistic sounds if available
+        """
         self.sample_rate = sample_rate
         self.noise_floor = -96  # dB - Very low noise floor
+        self.use_professional = use_professional and PROFESSIONAL_MODE
+        
+        # Initialize professional sound generator if available
+        if self.use_professional:
+            self.pro_gen = ProfessionalSoundGenerator(sample_rate)
+            print("✓ Professional realistic sound engine active")
+        else:
+            self.pro_gen = None
         
     def _normalize_premium(self, signal: np.ndarray, target_db: float = -6.0) -> np.ndarray:
         """
@@ -106,6 +129,7 @@ class SoundGenerator:
     def generate_kick(self, duration: float = 0.5, variation: float = 0.0) -> AudioSegment:
         """
         Generate a premium kick drum with advanced synthesis
+        Uses professional realistic synthesis if available
         
         Args:
             duration: Duration in seconds
@@ -114,6 +138,11 @@ class SoundGenerator:
         Returns:
             Premium kick drum AudioSegment
         """
+        # Use professional realistic kick if available
+        if self.use_professional and self.pro_gen:
+            return self.pro_gen.generate_realistic_kick(variation)
+        
+        # Fallback to enhanced synthesis
         samples = int(self.sample_rate * duration)
         t = np.linspace(0, duration, samples)
         
@@ -187,16 +216,23 @@ class SoundGenerator:
         
         return audio
     
-    def generate_snare(self, duration: float = 0.2) -> AudioSegment:
+    def generate_snare(self, duration: float = 0.2, variation: float = 0.5) -> AudioSegment:
         """
         Generate a snare drum sound
+        Uses professional realistic synthesis if available
         
         Args:
             duration: Duration in seconds
+            variation: Random variation amount (0-1)
         
         Returns:
             Snare drum AudioSegment
         """
+        # Use professional realistic snare if available
+        if self.use_professional and self.pro_gen:
+            return self.pro_gen.generate_realistic_snare(variation)
+        
+        # Fallback to basic synthesis
         samples = int(self.sample_rate * duration)
         t = np.linspace(0, duration, samples)
         
@@ -225,16 +261,25 @@ class SoundGenerator:
             channels=1
         )
     
-    def generate_hihat(self, duration: float = 0.1) -> AudioSegment:
+    def generate_hihat(self, duration: float = 0.1, closed: bool = True, 
+                      variation: float = 0.3) -> AudioSegment:
         """
         Generate a hi-hat sound
+        Uses professional realistic synthesis if available
         
         Args:
             duration: Duration in seconds
+            closed: True for closed hi-hat, False for open
+            variation: Random variation amount (0-1)
         
         Returns:
             Hi-hat AudioSegment
         """
+        # Use professional realistic hi-hat if available
+        if self.use_professional and self.pro_gen:
+            return self.pro_gen.generate_realistic_hihat(closed, variation)
+        
+        # Fallback to basic synthesis
         samples = int(self.sample_rate * duration)
         t = np.linspace(0, duration, samples)
         
@@ -395,6 +440,7 @@ class SoundGenerator:
                       velocity: float = 0.8, variation: float = 0.0) -> AudioSegment:
         """
         Generate a premium realistic piano sound with intelligent variations
+        Uses professional soundfont or advanced physical modeling if available
         
         Args:
             frequency: Base frequency in Hz
@@ -405,6 +451,11 @@ class SoundGenerator:
         Returns:
             Premium piano note AudioSegment
         """
+        # Use professional realistic piano if available (soundfont or enhanced modeling)
+        if self.use_professional and self.pro_gen:
+            return self.pro_gen.generate_realistic_piano(frequency, duration, velocity, variation)
+        
+        # Fallback to standard synthesis
         samples = int(self.sample_rate * duration)
         t = np.linspace(0, duration, samples)
         

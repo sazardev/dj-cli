@@ -1,0 +1,188 @@
+{
+  "metadata": {
+    "title": "Lofi Sunset",
+    "artist": "DJ CLI",
+    "genre": "lofi",
+    "tempo": 85,
+    "key": "C",
+    "time_signature": "4/4"
+  },
+
+  "patterns": {
+    "kick_pattern": {
+      "instrument": "kick",
+      "notes": "C2:q -:q C2:q -:q C2:q -:q C2:q -:q",
+      "volume": 1.0,
+      "variation": 0.3
+    },
+
+    "snare_pattern": {
+      "instrument": "snare",
+      "notes": "-:q C2:q -:q C2:q -:q C2:q -:q C2:q",
+      "volume": 0.8,
+      "variation": 0.4
+    },
+
+    "hihat_closed": {
+      "instrument": "hihat",
+      "notes": "C2:e C2:e C2:e C2:e C2:e C2:e C2:e C2:e",
+      "volume": 0.6,
+      "variation": 0.5
+    },
+
+    "hihat_open": {
+      "instrument": "hihat",
+      "notes": "-:e -:e -:e open:e -:e -:e -:e open:e",
+      "volume": 0.5,
+      "variation": 0.3
+    },
+
+    "bass_groove": {
+      "instrument": "bass",
+      "notes": "C2:q. E2:e G2:q C3:q C2:q. E2:e G2:q A2:q",
+      "volume": 0.9,
+      "effects": {
+        "filter": {
+          "mix": 0.3,
+          "intensity": 0.4
+        }
+      }
+    },
+
+    "piano_chords": {
+      "instrument": "piano",
+      "notes": [
+        {"pitch": "C4", "duration": "whole", "velocity": 0.7},
+        {"pitch": "E4", "duration": "whole", "velocity": 0.7},
+        {"pitch": "G4", "duration": "whole", "velocity": 0.7}
+      ],
+      "volume": 0.7,
+      "variation": 0.6,
+      "effects": {
+        "reverb": {
+          "mix": 0.4,
+          "intensity": 0.6
+        }
+      }
+    },
+
+    "piano_melody": {
+      "instrument": "piano",
+      "notes": "C5:e D5:e E5:q G5:e E5:e D5:h C5:e D5:e E5:q G5:q A5:h",
+      "volume": 0.8,
+      "variation": 0.5,
+      "effects": {
+        "reverb": {
+          "mix": 0.3,
+          "intensity": 0.5
+        },
+        "delay": {
+          "mix": 0.2,
+          "intensity": 0.3
+        }
+      }
+    },
+
+    "ambient_pad": {
+      "instrument": "pad",
+      "notes": "C3:w E3:w G3:w",
+      "volume": 0.4,
+      "effects": {
+        "reverb": {
+          "mix": 0.7,
+          "intensity": 0.8
+        },
+        "chorus": {
+          "mix": 0.5,
+          "intensity": 0.6
+        }
+      }
+    },
+
+    "sub_bass": {
+      "instrument": "sub_bass",
+      "notes": "C1:w",
+      "volume": 0.7
+    }
+  },
+
+  "sections": {
+    "intro": {
+      "bars": 4,
+      "patterns": ["ambient_pad", "piano_melody"],
+      "effects": {
+        "reverb": {
+          "mix": 0.5,
+          "intensity": 0.7
+        }
+      }
+    },
+
+    "verse": {
+      "bars": 8,
+      "patterns": [
+        "kick_pattern",
+        "snare_pattern", 
+        "hihat_closed",
+        "bass_groove",
+        "piano_chords",
+        "ambient_pad",
+        "sub_bass"
+      ]
+    },
+
+    "chorus": {
+      "bars": 8,
+      "patterns": [
+        "kick_pattern",
+        "snare_pattern",
+        "hihat_closed",
+        "hihat_open",
+        "bass_groove",
+        "piano_melody",
+        "ambient_pad",
+        "sub_bass"
+      ],
+      "effects": {
+        "chorus": {
+          "mix": 0.3,
+          "intensity": 0.4
+        }
+      }
+    },
+
+    "break": {
+      "bars": 4,
+      "patterns": ["hihat_closed", "piano_melody", "ambient_pad"],
+      "tempo": 70
+    },
+
+    "outro": {
+      "bars": 4,
+      "patterns": ["ambient_pad", "piano_chords"],
+      "effects": {
+        "reverb": {
+          "mix": 0.7,
+          "intensity": 0.9
+        }
+      }
+    }
+  },
+
+  "structure": [
+    "intro",
+    "verse",
+    "chorus",
+    "verse",
+    "break",
+    "chorus",
+    "outro"
+  ],
+
+  "global_effects": {
+    "reverb": {
+      "mix": 0.2,
+      "intensity": 0.3
+    }
+  }
+}

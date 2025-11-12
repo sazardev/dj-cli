@@ -1,0 +1,175 @@
+{
+  "metadata": {
+    "title": "Neon Nights",
+    "artist": "DJ CLI",
+    "genre": "electro",
+    "tempo": 128,
+    "key": "Am",
+    "time_signature": "4/4"
+  },
+
+  "patterns": {
+    "kick_4x4": {
+      "instrument": "kick",
+      "notes": "C2:q C2:q C2:q C2:q",
+      "volume": 1.2,
+      "variation": 0.2
+    },
+
+    "snare_backbeat": {
+      "instrument": "snare",
+      "notes": "-:q C2:q -:q C2:q",
+      "volume": 1.0,
+      "variation": 0.3
+    },
+
+    "hihat_16th": {
+      "instrument": "hihat",
+      "notes": "C2:s C2:s C2:s C2:s C2:s C2:s C2:s C2:s C2:s C2:s C2:s C2:s C2:s C2:s C2:s C2:s",
+      "volume": 0.7,
+      "variation": 0.6
+    },
+
+    "bass_electro": {
+      "instrument": "bass",
+      "notes": "A1:e A1:e A1:e -:e C2:e C2:e C2:e -:e G1:e G1:e G1:e -:e F1:e F1:e F1:e -:e",
+      "volume": 1.1,
+      "effects": {
+        "distortion": {
+          "mix": 0.4,
+          "intensity": 0.5
+        },
+        "filter": {
+          "mix": 0.6,
+          "intensity": 0.7
+        }
+      }
+    },
+
+    "synth_lead": {
+      "instrument": "synth",
+      "notes": "A4:e C5:e E5:e A5:q. E5:e C5:e A4:e C5:e E5:e G5:q. E5:e",
+      "volume": 0.9,
+      "variation": 0.4,
+      "effects": {
+        "delay": {
+          "mix": 0.5,
+          "intensity": 0.6
+        },
+        "chorus": {
+          "mix": 0.3,
+          "intensity": 0.4
+        }
+      }
+    },
+
+    "synth_stab": {
+      "instrument": "synth",
+      "notes": "A3:s -:s -:s -:s C4:s -:s -:s -:s G3:s -:s -:s -:s F3:s -:s -:s -:s",
+      "volume": 1.0,
+      "effects": {
+        "distortion": {
+          "mix": 0.3,
+          "intensity": 0.4
+        }
+      }
+    },
+
+    "pad_ambient": {
+      "instrument": "pad",
+      "notes": "A2:w C3:w E3:w",
+      "volume": 0.5,
+      "effects": {
+        "reverb": {
+          "mix": 0.8,
+          "intensity": 0.9
+        }
+      }
+    },
+
+    "clap": {
+      "instrument": "clap",
+      "notes": "-:q C2:s C2:s -:q C2:s C2:s",
+      "volume": 0.8,
+      "variation": 0.4
+    }
+  },
+
+  "sections": {
+    "intro": {
+      "bars": 4,
+      "patterns": ["kick_4x4", "hihat_16th", "pad_ambient"]
+    },
+
+    "buildup": {
+      "bars": 8,
+      "patterns": [
+        "kick_4x4",
+        "snare_backbeat",
+        "hihat_16th",
+        "synth_stab",
+        "pad_ambient"
+      ],
+      "effects": {
+        "filter": {
+          "mix": 0.7,
+          "intensity": 0.8
+        }
+      }
+    },
+
+    "drop": {
+      "bars": 16,
+      "patterns": [
+        "kick_4x4",
+        "snare_backbeat",
+        "hihat_16th",
+        "clap",
+        "bass_electro",
+        "synth_lead",
+        "synth_stab",
+        "pad_ambient"
+      ],
+      "effects": {
+        "chorus": {
+          "mix": 0.4,
+          "intensity": 0.5
+        }
+      }
+    },
+
+    "breakdown": {
+      "bars": 8,
+      "patterns": ["hihat_16th", "synth_lead", "pad_ambient"],
+      "tempo": 64,
+      "effects": {
+        "reverb": {
+          "mix": 0.7,
+          "intensity": 0.8
+        }
+      }
+    },
+
+    "outro": {
+      "bars": 4,
+      "patterns": ["kick_4x4", "pad_ambient"]
+    }
+  },
+
+  "structure": [
+    "intro",
+    "buildup",
+    "drop",
+    "breakdown",
+    "buildup",
+    "drop",
+    "outro"
+  ],
+
+  "global_effects": {
+    "reverb": {
+      "mix": 0.15,
+      "intensity": 0.3
+    }
+  }
+}
