@@ -20,13 +20,13 @@ except ImportError:
 class SoundGenerator:
     """Generate synthesized sounds and drum samples with premium quality"""
     
-    def __init__(self, sample_rate: int = 96000, use_professional: bool = True):
+    def __init__(self, sample_rate: int = 96000, use_professional: bool = False):
         """
         Initialize sound generator
         
         Args:
             sample_rate: Sample rate in Hz (default 96kHz)
-            use_professional: Use professional realistic sounds if available
+            use_professional: Use professional realistic sounds if available (DISABLED by default due to volume issues)
         """
         self.sample_rate = sample_rate
         self.noise_floor = -96  # dB - Very low noise floor
@@ -198,17 +198,11 @@ class SoundGenerator:
         # Combine with careful gain staging
         kick[:len(click)] += click
         
-        # PROFESSIONAL normalization (STRICT headroom for broadcast)
-        kick = self._normalize_premium(kick)  # Use default -3dB for hot levels that survive mixing
-        
-        # Apply noise gate
-        kick = self._apply_noise_gate(kick, threshold=0.005)
-        
-        # Add subtle analog warmth
-        kick = self._add_subtle_analog_warmth(kick, amount=0.015)
+        # PROFESSIONAL normalization (hot levels for mixing)
+        kick = self._normalize_premium(kick)  # Use default -3dB for hot levels
         
         # Convert to 16-bit integer (PROFESSIONAL STANDARD)
-        kick = np.int16(kick * (2**15 - 1))
+        kick = (kick * 32767).astype(np.int16)
         
         # Convert to AudioSegment (16-bit for compatibility)
         audio = AudioSegment(
