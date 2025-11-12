@@ -9,10 +9,67 @@ from typing import Optional
 
 
 class SoundGenerator:
-    """Generate synthesized sounds and drum samples"""
+    """Generate synthesized sounds and drum samples with premium quality"""
     
-    def __init__(self, sample_rate: int = 48000):  # Increased to 48kHz for better quality
+    def __init__(self, sample_rate: int = 96000):  # Premium 96kHz for maximum quality
         self.sample_rate = sample_rate
+        self.noise_floor = -96  # dB - Very low noise floor
+        
+    def _normalize_premium(self, signal: np.ndarray, target_db: float = -6.0) -> np.ndarray:
+        """
+        Premium normalization with headroom and RMS balancing
+        
+        Args:
+            signal: Input signal
+            target_db: Target dB level (default -6dB for headroom)
+        
+        Returns:
+            Normalized signal
+        """
+        # Calculate RMS
+        rms = np.sqrt(np.mean(signal ** 2))
+        
+        if rms > 0:
+            # Target RMS based on dB
+            target_rms = 10 ** (target_db / 20)
+            # Normalize to target RMS
+            signal = signal * (target_rms / rms)
+        
+        # Prevent clipping
+        max_val = np.max(np.abs(signal))
+        if max_val > 1.0:
+            signal = signal / max_val * 0.99
+        
+        return signal
+    
+    def _apply_noise_gate(self, signal: np.ndarray, threshold: float = 0.01) -> np.ndarray:
+        """
+        Apply noise gate to remove low-level noise
+        
+        Args:
+            signal: Input signal
+            threshold: Gate threshold (0-1)
+        
+        Returns:
+            Gated signal
+        """
+        mask = np.abs(signal) > threshold
+        return signal * mask
+    
+    def _add_subtle_analog_warmth(self, signal: np.ndarray, amount: float = 0.02) -> np.ndarray:
+        """
+        Add subtle analog-style warmth (very subtle harmonic distortion)
+        
+        Args:
+            signal: Input signal
+            amount: Amount of warmth (0-1)
+        
+        Returns:
+            Warmed signal
+        """
+        # Very subtle soft clipping for warmth
+        warmed = np.tanh(signal * (1 + amount * 0.5)) / (1 + amount * 0.5)
+        return warmed
     
     def generate(self, sound_type: str, duration: float = 1.0, frequency: Optional[int] = None) -> AudioSegment:
         """
