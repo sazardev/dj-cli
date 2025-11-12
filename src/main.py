@@ -417,6 +417,89 @@ def genres():
     console.print("[yellow]💡 Tip:[/yellow] Use [cyan]dj-cli compose --genre <name>[/cyan] to create a track")
 
 
+@app.command()
+def compile(
+    jdcli_file: str = typer.Argument(..., help=".jdcli composition file to compile"),
+    output: str = typer.Option("output.wav", "--output", "-o", help="Output audio file"),
+    verbose: bool = typer.Option(True, "--verbose/--quiet", "-v/-q", help="Show compilation details"),
+):
+    """
+    🎼 Compile a .jdcli composition file into audio
+    
+    JDCL (JSON DJ Composition Language) allows you to write music like code!
+    
+    Example:
+        dj-cli compile examples/lofi_sunset.jdcli -o my_song.wav
+    """
+    from src.jdcl_compiler import JDCLCompiler
+    
+    console.print(f"[cyan]🎵 DJ CLI Compiler v0.4.0[/cyan]")
+    console.print()
+    
+    if not os.path.exists(jdcli_file):
+        console.print(f"[red]❌ Error: File not found: {jdcli_file}[/red]")
+        raise typer.Exit(1)
+    
+    if not jdcli_file.endswith('.jdcli'):
+        console.print(f"[yellow]⚠ Warning: File should have .jdcli extension[/yellow]")
+    
+    try:
+        compiler = JDCLCompiler()
+        audio = compiler.compile_file(jdcli_file, output, verbose=verbose)
+        
+        console.print()
+        console.print(f"[green]✓ Success![/green] Audio compiled to [cyan]{output}[/cyan]")
+        
+    except Exception as e:
+        console.print(f"\n[red]❌ Compilation error: {str(e)}[/red]")
+        import traceback
+        if verbose:
+            console.print(traceback.format_exc())
+        raise typer.Exit(1)
+
+
+@app.command()
+def validate(
+    jdcli_file: str = typer.Argument(..., help=".jdcli file to validate"),
+):
+    """
+    ✓ Validate a .jdcli composition file
+    
+    Check for syntax errors and undefined references
+    """
+    from src.jdcl_parser import JDCLParser
+    
+    console.print(f"[cyan]Validating {jdcli_file}...[/cyan]")
+    console.print()
+    
+    if not os.path.exists(jdcli_file):
+        console.print(f"[red]❌ Error: File not found: {jdcli_file}[/red]")
+        raise typer.Exit(1)
+    
+    try:
+        parser = JDCLParser()
+        composition = parser.parse_file(jdcli_file)
+        
+        # Show summary
+        parser.print_summary()
+        
+        # Validate
+        is_valid, errors = parser.validate()
+        
+        console.print()
+        if is_valid:
+            console.print("[green]✓ Validation passed! No errors found.[/green]")
+        else:
+            console.print("[red]❌ Validation failed with errors:[/red]")
+            for error in errors:
+                console.print(f"  • {error}")
+            raise typer.Exit(1)
+            
+    except Exception as e:
+        console.print(f"[red]❌ Parse error: {str(e)}[/red]")
+        raise typer.Exit(1)
+
+
 @app.callback(invoke_without_command=True)
 def main(
     ctx: typer.Context,
@@ -436,6 +519,9 @@ def main(
         console.print(Panel.fit(
             "[bold cyan]🎵 DJ CLI - Advanced Music Generator[/bold cyan]\n\n"
             "Create music using your terminal!\n\n"
+            "[yellow]🎼 JDCL Composition (NEW!):[/yellow]\n"
+            "  dj-cli compile song.jdcli      - Compile .jdcli to audio\n"
+            "  dj-cli validate song.jdcli     - Validate composition\n\n"
             "[yellow]🎼 Auto-Composition:[/yellow]\n"
             "  dj-cli compose --genre lofi    - Auto-compose complete tracks\n"
             "  dj-cli auto --duration 120     - Generate continuous music\n"
