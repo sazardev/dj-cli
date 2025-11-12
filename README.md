@@ -2,30 +2,41 @@
 
 [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Quality](https://img.shields.io/badge/audio-48kHz%20studio-brightgreen.svg)]()
+[![Quality](https://img.shields.io/badge/audio-96kHz%20studio-brightgreen.svg)]()
 
 An **advanced command-line music generator** that automatically composes complete tracks with drums, bass, chords, and melodies. Generate continuous, evolving music in multiple genres directly from your terminal!
 
-**NEW in v0.2.0**: 🎧 **Professional audio quality** with 48kHz sampling, realistic piano, ambient pads, sub-bass, and atmospheric textures!
+**NEW in v0.4.0**: � **JDCL - JSON DJ Composition Language**! Program music like code with full control over every note, pattern, and effect!
+
+**NEW in v0.3.0**: �🎧 **Professional audio quality** with 96kHz sampling, realistic piano, FluidSynth soundfonts, physical modeling drums!
 
 ## ✨ Features
 
+### 🎼 JDCL - Music Programming Language (NEW!)
+- **Write Music as Code**: Create compositions using human-readable JSON
+- **Full Control**: Define every note, pattern, section, and effect
+- **Reusable Patterns**: Create loops and use them multiple times
+- **Professional Effects**: Reverb, delay, distortion, chorus, filters
+- **Version Control**: Store compositions in Git, collaborate with others
+- **Compile to Audio**: Transform .jdcli files into professional WAV files
+- **[See JDCL Documentation](JDCL_LANGUAGE.md)** for complete language reference
+
 ### 🎼 Automatic Composition
 - **Auto-Compose Complete Tracks**: Generate full songs with drums, bass, chords, and melody
-- **Professional Audio Quality**: 48kHz sample rate for studio-grade output
-- **Realistic Instruments**: Piano with ADSR envelopes, ambient pads, sub-bass
+- **Professional Audio Quality**: 96kHz sample rate for studio-grade output
+- **Realistic Instruments**: FluidSynth soundfonts + physical modeling
 - **Multiple Genres**: lofi, electro, funk, relax, ambient, synthwave, and more
 - **Music Theory Engine**: Chord progressions, scales, and harmonic structures
 - **Continuous Generation**: Create evolving, non-repetitive music of any length
 - **Mixtapes**: Generate multi-genre mixes with smooth transitions
 - **Atmospheric Layers**: Ambient textures and evolving soundscapes
 
-### 🎹 Instruments & Sounds
-- **🎹 Piano**: Realistic additive synthesis with harmonics (lofi, funk)
+### 🎹 Instruments & Sounds (Professional Quality)
+- **🎹 Piano**: FluidSynth soundfont (real samples) or 16-harmonic physical modeling
+- **🥁 Drums**: Multi-layer physical modeling (5-layer kick, 4-layer snare, metallic hi-hat)
 - **🌊 Pads**: Ambient atmospheric pads (relax, ambient)
 - **🔊 Sub-Bass**: Deep low-end layer for power and depth
 - **✨ Ambient Textures**: Evolving background soundscapes
-- **🥁 Improved Drums**: Punchy kick, crisp snare, clean hi-hat
 - **🎸 Synthesizers**: Multiple waveforms and complex harmonics
 
 ### 🎚️ Manual Sound Design
@@ -43,7 +54,7 @@ Make sure you have the following installed on Arch Linux:
 
 ```bash
 # Install system dependencies
-sudo pacman -S ffmpeg portaudio jack2 python python-pip
+sudo pacman -S ffmpeg portaudio jack2 python python-pip fluidsynth soundfont-fluid
 ```
 
 ### Setup

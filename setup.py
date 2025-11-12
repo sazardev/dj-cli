@@ -9,10 +9,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="dj-cli",
-    version="0.2.0",
+    version="0.4.0",
     author="Your Name",
     author_email="your.email@example.com",
-    description="Create professional quality music using your terminal",
+    description="Create professional quality music using your terminal - with JDCL language support",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/yourusername/dj-cli",

@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "title": "Mi Primera Canción",
+    "artist": "Tú",
+    "genre": "lofi",
+    "tempo": 90,
+    "key": "C",
+    "time_signature": "4/4"
+  },
+
+  "patterns": {
+    "kick": {
+      "instrument": "kick",
+      "notes": "C2:q -:q C2:q -:q",
+      "volume": 1.0
+    },
+
+    "melody": {
+      "instrument": "piano",
+      "notes": "C4:q E4:q G4:q E4:q",
+      "volume": 0.8,
+      "effects": {
+        "reverb": {"mix": 0.3, "intensity": 0.5}
+      }
+    }
+  },
+
+  "sections": {
+    "main": {
+      "bars": 4,
+      "patterns": ["kick", "melody"]
+    }
+  },
+
+  "structure": ["main"]
+}
