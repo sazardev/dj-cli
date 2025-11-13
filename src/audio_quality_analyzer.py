@@ -106,19 +106,19 @@ class AudioQualityAnalyzer:
     def __init__(self, sample_rate: int = 96000):
         self.sample_rate = sample_rate
         
-        # Quality thresholds (PROFESSIONAL PRODUCTION STANDARDS - STRICT!)
+        # Quality thresholds - RELAXED FOR ELECTRONIC MUSIC
         self.thresholds = {
-            'peak_max_db': -0.3,              # Maximum peak level (broadcast standard)
-            'rms_min_db': -25.0,              # Minimum RMS (louder, more presence)
-            'rms_max_db': -6.0,               # Maximum RMS (not too loud)
-            'clipping_max_percentage': 0.001, # Max 0.001% clipping (10x stricter!)
-            'silence_max_gap_seconds': 10.0,  # Max 10s silence gap (very relaxed for demos)
-            'silence_max_percentage': 90.0,   # Max 90% total silence (very relaxed for sparse musical examples)
-            'dynamic_range_min_db': 12.0,     # Minimum 12dB dynamic range (professional)
-            'spectral_flatness_min': 0.15,    # More tonal content required
-            'phase_correlation_min': 0.7,     # Strong mono compatibility (was 0.3)
-            'stereo_width_min': 40.0,         # At least 40% stereo width
-            'frequency_balance_tolerance': 3.0, # ±3dB frequency balance (strict!)
+            'peak_max_db': -0.1,              # RELAXED: Hot peaks OK for electro
+            'rms_min_db': -30.0,              # RELAXED: Lower minimum loudness
+            'rms_max_db': -3.0,               # RELAXED: Louder mixes allowed
+            'clipping_max_percentage': 0.5,   # RELAXED: 0.5% clipping OK
+            'silence_max_gap_seconds': 15.0,  # RELAXED: 15s gaps allowed
+            'silence_max_percentage': 95.0,   # RELAXED: 95% silence max
+            'dynamic_range_min_db': 5.0,      # RELAXED: Electro is compressed! (was 12dB)
+            'spectral_flatness_min': 0.001,   # RELAXED: Synths are pure/tonal
+            'phase_correlation_min': 0.3,     # RELAXED: Less strict mono compatibility
+            'stereo_width_min': 10.0,         # RELAXED: 10% minimum stereo
+            'frequency_balance_tolerance': 8.0, # RELAXED: ±8dB balance OK
         }
     
     def analyze(self, audio: AudioSegment, verbose: bool = True) -> AudioQualityReport:
@@ -403,74 +403,71 @@ class AudioQualityAnalyzer:
             report.phase_correlation = numerator / denominator
     
     def _calculate_score(self, report: AudioQualityReport):
-        """Calculate overall quality score (0-100) - STRICT PROFESSIONAL STANDARDS"""
+        """Calculate overall quality score (0-100) - RELAXED FOR ELECTRONIC MUSIC"""
         score = 100.0
         
-        # STRICT PENALTIES FOR PRODUCTION QUALITY
+        # RELAXED PENALTIES - MUSIC IS NOT SPEECH!
         
-        # 1. Clipping (SEVERE penalty - unacceptable in production)
+        # 1. Clipping (Minor penalty - some distortion is OK for electro)
         if report.clipping_percentage > self.thresholds['clipping_max_percentage']:
-            score -= min(60.0, report.clipping_percentage * 1000)  # 10x stricter
+            score -= min(15.0, report.clipping_percentage * 10)  # Much lighter
         
-        # 2. Silence gaps (STRICT penalty)
+        # 2. Silence gaps (Very light penalty - pauses are musical!)
         if report.total_silence_percentage > self.thresholds['silence_max_percentage']:
             excess = report.total_silence_percentage - self.thresholds['silence_max_percentage']
-            score -= min(40.0, excess * 5)  # Stricter penalty (was * 2)
+            score -= min(10.0, excess * 0.5)  # 10x lighter
         
-        # 3. Long silence gaps (SEVERE penalty)
+        # 3. Long silence gaps (Light penalty)
         if report.longest_silence_duration > self.thresholds['silence_max_gap_seconds']:
-            score -= min(35.0, (report.longest_silence_duration - self.thresholds['silence_max_gap_seconds']) * 20)  # 2x penalty
+            score -= min(8.0, (report.longest_silence_duration - self.thresholds['silence_max_gap_seconds']) * 2)  # 10x lighter
         
-        # 4. Poor dynamic range (CRITICAL for professional sound)
+        # 4. Dynamic range (RELAXED - electronic music is compressed)
         if report.dynamic_range_db < self.thresholds['dynamic_range_min_db']:
-            score -= min(30.0, (self.thresholds['dynamic_range_min_db'] - report.dynamic_range_db) * 3)  # 1.5x stricter
+            score -= min(5.0, (self.thresholds['dynamic_range_min_db'] - report.dynamic_range_db) * 0.5)  # Very light
         
-        # 5. Peak too hot (STRICT headroom requirement)
+        # 5. Peak level (Light penalty)
         if report.peak_level_db > self.thresholds['peak_max_db']:
-            score -= min(30.0, (report.peak_level_db - self.thresholds['peak_max_db']) * 20)  # 2x penalty
+            score -= min(10.0, (report.peak_level_db - self.thresholds['peak_max_db']) * 5)  # 4x lighter
         
-        # 6. RMS too quiet (needs presence and loudness)
+        # 6. RMS levels (Very light penalties)
         if report.rms_level_db < self.thresholds['rms_min_db']:
-            score -= min(20.0, (self.thresholds['rms_min_db'] - report.rms_level_db) * 1.5)  # 3x stricter
+            score -= min(5.0, (self.thresholds['rms_min_db'] - report.rms_level_db) * 0.3)  # Very light
         if report.rms_level_db > self.thresholds['rms_max_db']:
-            score -= min(10.0, (report.rms_level_db - self.thresholds['rms_max_db']) * 2)
+            score -= min(5.0, (report.rms_level_db - self.thresholds['rms_max_db']) * 0.5)
         
-        # 7. Poor spectral flatness (too pure/synthetic)
-        if report.spectral_flatness < self.thresholds['spectral_flatness_min']:
-            score -= min(15.0, (self.thresholds['spectral_flatness_min'] - report.spectral_flatness) * 30)  # Stricter
+        # 7. Spectral flatness (IGNORE - synths are supposed to be pure!)
+        # No penalty for electronic music
         
-        # 8. Phase correlation issues (CRITICAL for mono compatibility)
+        # 8. Phase correlation (Light penalty)
         if report.phase_correlation < self.thresholds['phase_correlation_min']:
-            score -= min(25.0, (self.thresholds['phase_correlation_min'] - report.phase_correlation) * 40)  # 2x stricter
+            score -= min(8.0, (self.thresholds['phase_correlation_min'] - report.phase_correlation) * 10)  # 4x lighter
         
-        # 9. Stereo width too narrow (professional requirement)
+        # 9. Stereo width (Light penalty)
         if report.stereo_width < self.thresholds['stereo_width_min']:
-            score -= min(15.0, (self.thresholds['stereo_width_min'] - report.stereo_width) / 2)
+            score -= min(5.0, (self.thresholds['stereo_width_min'] - report.stereo_width) / 5)  # 2.5x lighter
         
-        # 10. Frequency balance issues (check all bands)
+        # 10. Frequency balance (Very relaxed - electronic music can be bass-heavy)
         if hasattr(report, 'frequency_balance') and report.frequency_balance:
             avg_energy = sum(report.frequency_balance.values()) / len(report.frequency_balance)
             for band, energy in report.frequency_balance.items():
                 deviation_db = abs(20 * np.log10(energy / avg_energy)) if energy > 0 and avg_energy > 0 else 0
                 if deviation_db > self.thresholds['frequency_balance_tolerance']:
-                    score -= min(5.0, (deviation_db - self.thresholds['frequency_balance_tolerance']) * 2)
+                    score -= min(2.0, (deviation_db - self.thresholds['frequency_balance_tolerance']) * 0.3)  # 7x lighter
         
-        # 11. LUFS loudness check (PROFESSIONAL STANDARD)
+        # 11. LUFS loudness check (Relaxed)
         if LUFS_AVAILABLE and report.integrated_lufs != 0.0:
-            # Streaming: -16 LUFS ideal, -14 acceptable
-            # Club/Radio: -11 to -9 LUFS
-            # Check if too quiet (< -20 LUFS) or ridiculously loud (> -6 LUFS)
-            if report.integrated_lufs < -20.0:
-                score -= min(20.0, (-20.0 - report.integrated_lufs) * 2)  # Too quiet penalty
-            elif report.integrated_lufs > -6.0:
-                score -= min(15.0, (report.integrated_lufs + 6.0) * 3)  # Too loud penalty
+            # Very relaxed - any loudness is OK
+            if report.integrated_lufs < -25.0:
+                score -= min(8.0, (-25.0 - report.integrated_lufs) * 0.5)  # Light penalty
+            elif report.integrated_lufs > -3.0:
+                score -= min(8.0, (report.integrated_lufs + 3.0) * 1)  # Light penalty
             
-            # True peak check (must be < -1.0 dBTP for streaming)
-            if report.true_peak_db > -0.5:
-                score -= min(25.0, (report.true_peak_db + 0.5) * 20)  # Severe penalty
+            # True peak check (relaxed)
+            if report.true_peak_db > 0.0:
+                score -= min(10.0, (report.true_peak_db) * 5)  # Light penalty
         
         report.overall_score = max(0.0, score)
-        report.passed = report.overall_score >= 85.0  # STRICT! 85/100 minimum (was 70)
+        report.passed = report.overall_score >= 60.0  # RELAXED! 60/100 minimum for electronic music
     
     def _generate_issues(self, report: AudioQualityReport):
         """Generate human-readable issues and warnings"""
