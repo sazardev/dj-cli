@@ -380,7 +380,7 @@ class JDCLCompiler:
     
     def _compile_drum_pattern(self, pattern: Pattern, tempo: int,
                              bars: int, time_signature: tuple) -> AudioSegment:
-        """Compile drum pattern"""
+        """Compile drum pattern - FIXED: Now properly repeats pattern for all bars"""
         
         beat_duration_ms = (60.0 / tempo) * 1000
         bar_duration_ms = beat_duration_ms * time_signature[0]
@@ -389,48 +389,50 @@ class JDCLCompiler:
         # Start with silence
         drum_track = AudioSegment.silent(duration=total_duration_ms)
         
-        # Place each hit
-        current_time_ms = 0
-        current_beat = 0
+        # Calculate pattern duration (sum of all note durations)
+        pattern_duration_beats = sum(note.duration for note in pattern.notes)
+        pattern_duration_ms = pattern_duration_beats * beat_duration_ms
         
-        for note in pattern.notes:
-            if not note.is_rest():
-                # Generate drum sound
-                if pattern.instrument == 'kick':
-                    sound = self.generator.generate_kick(0.5, pattern.variation)
-                elif pattern.instrument == 'snare':
-                    sound = self.generator.generate_snare(0.2, pattern.variation)
-                elif pattern.instrument == 'hihat':
-                    closed = note.pitch.lower() != 'open'
-                    sound = self.generator.generate_hihat(0.1, closed, pattern.variation)
-                elif pattern.instrument == 'clap':
-                    sound = self.generator.generate_snare(0.15, pattern.variation)
-                else:
-                    sound = self.generator.generate_kick(0.5, pattern.variation)
-                
-                # Apply velocity
-                if note.velocity != 1.0:
-                    db_change = 20 * np.log10(note.velocity)
-                    sound = sound + db_change
-                
-                # Overlay at current position
-                drum_track = drum_track.overlay(sound, position=int(current_time_ms))
+        # REPEAT pattern for all bars
+        for bar_num in range(bars):
+            bar_start_ms = bar_num * bar_duration_ms
+            current_time_ms = 0
             
-            # Advance time
-            note_duration_ms = note.duration * beat_duration_ms
-            current_time_ms += note_duration_ms
-            current_beat += note.duration
-            
-            # Loop back if we exceed the bar length
-            if current_time_ms >= total_duration_ms:
-                current_time_ms = current_time_ms % total_duration_ms
+            for note in pattern.notes:
+                if not note.is_rest():
+                    # Generate drum sound
+                    if pattern.instrument == 'kick':
+                        sound = self.generator.generate_kick(0.5, pattern.variation)
+                    elif pattern.instrument == 'snare':
+                        sound = self.generator.generate_snare(0.2, pattern.variation)
+                    elif pattern.instrument == 'hihat':
+                        closed = note.pitch.lower() != 'open'
+                        sound = self.generator.generate_hihat(0.1, closed, pattern.variation)
+                    elif pattern.instrument == 'clap':
+                        sound = self.generator.generate_snare(0.15, pattern.variation)
+                    else:
+                        sound = self.generator.generate_kick(0.5, pattern.variation)
+                    
+                    # Apply velocity
+                    if note.velocity != 1.0:
+                        db_change = 20 * np.log10(note.velocity)
+                        sound = sound + db_change
+                    
+                    # Overlay at current position (bar start + offset)
+                    absolute_position = int(bar_start_ms + current_time_ms)
+                    if absolute_position < total_duration_ms:
+                        drum_track = drum_track.overlay(sound, position=absolute_position)
+                
+                # Advance time within pattern
+                note_duration_ms = note.duration * beat_duration_ms
+                current_time_ms += note_duration_ms
         
         return drum_track
     
     def _compile_melodic_pattern(self, pattern: Pattern, tempo: int,
                                 key: str, bars: int, 
                                 time_signature: tuple) -> AudioSegment:
-        """Compile melodic pattern (piano, synth, bass, etc.)"""
+        """Compile melodic pattern (piano, synth, bass, etc.) - FIXED: Now properly repeats pattern"""
         
         beat_duration_ms = (60.0 / tempo) * 1000
         bar_duration_ms = beat_duration_ms * time_signature[0]
@@ -439,32 +441,40 @@ class JDCLCompiler:
         # Start with silence
         melodic_track = AudioSegment.silent(duration=total_duration_ms)
         
-        # Place each note
-        current_time_ms = 0
+        # Calculate pattern duration (sum of all note durations)
+        pattern_duration_beats = sum(note.duration for note in pattern.notes)
+        pattern_duration_ms = pattern_duration_beats * beat_duration_ms
         
-        for note in pattern.notes:
-            if not note.is_rest():
-                # Convert note to frequency
-                frequency = self._note_to_frequency(note.pitch)
-                
-                # Calculate note duration in seconds
-                note_duration_sec = (note.duration * beat_duration_ms) / 1000.0
-                
-                # Generate sound based on instrument
-                sound = self._generate_instrument_sound(
-                    pattern.instrument,
-                    frequency,
-                    note_duration_sec,
-                    note.velocity,
-                    pattern.variation
-                )
-                
-                # Overlay at current position
-                melodic_track = melodic_track.overlay(sound, position=int(current_time_ms))
+        # REPEAT pattern for all bars
+        for bar_num in range(bars):
+            bar_start_ms = bar_num * bar_duration_ms
+            current_time_ms = 0
             
-            # Advance time
-            note_duration_ms = note.duration * beat_duration_ms
-            current_time_ms += note_duration_ms
+            for note in pattern.notes:
+                if not note.is_rest():
+                    # Convert note to frequency
+                    frequency = self._note_to_frequency(note.pitch)
+                    
+                    # Calculate note duration in seconds
+                    note_duration_sec = (note.duration * beat_duration_ms) / 1000.0
+                    
+                    # Generate sound based on instrument
+                    sound = self._generate_instrument_sound(
+                        pattern.instrument,
+                        frequency,
+                        note_duration_sec,
+                        note.velocity,
+                        pattern.variation
+                    )
+                    
+                    # Overlay at current position (bar start + offset)
+                    absolute_position = int(bar_start_ms + current_time_ms)
+                    if absolute_position < total_duration_ms:
+                        melodic_track = melodic_track.overlay(sound, position=absolute_position)
+                
+                # Advance time within pattern
+                note_duration_ms = note.duration * beat_duration_ms
+                current_time_ms += note_duration_ms
         
         return melodic_track
     
